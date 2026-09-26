@@ -24,6 +24,8 @@
 | 3:15 | "Opening a PR changes someone else's repo, so TrueForge holds it for approval." | **Approval card** → Approve → the PR on GitHub with the video inline |
 | 3:45 | "Emailing the customer **can't be undone**. The agent must call the tool, and the harness stops it. I see the exact draft, the recipient and the evidence." | **Approval card** for `send_customer_reply` → Approve → the email/Linear comment |
 | 4:15 | "And when it *can't* reproduce, it says so. TRU-9 claims prices show in dollars. It tested Chromium, Firefox and mobile: all ₹900. No patch, no PR, a video of the attempts, and one precise question for the customer." | The TRU-9 session (pre-run) |
+| 4:25 | "Nobody even has to hand it tickets. A **TrueForge Schedule** wakes it every hour to sweep Linear. It triages the queue, claims the oldest real bug, and fixes it, and it still waits for a human at the gates." | TrueForge → Schedules → **Run now** → the Triage card (queue, classification, picked ticket) |
+| 4:35 | "Every model call goes through the **TrueFoundry AI Gateway**, with a $5/day budget cap. Here's what that ticket cost." | Gateway request logs filtered by `ticket=<id>`, plus the budget page |
 | 4:40 | "Code runs in two sandboxes and secrets never enter either. Everything's on TrueForge: sandbox, skills, MCP, approvals, Generative UI. One command to run it." | README "Safety" table |
 
 ## Likely judge questions

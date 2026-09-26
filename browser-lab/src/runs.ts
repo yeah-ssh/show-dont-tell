@@ -50,7 +50,10 @@ async function prepareCheckout(dir: string, patch?: string): Promise<void> {
     await mkdir(dirname(mirror), { recursive: true });
     await mustRun('git', ['clone', '--quiet', '--mirror', config.targetRepo, mirror], { timeoutMs: 120_000 });
   } else {
-    await mustRun('git', ['-C', mirror, 'remote', 'update', '--prune'], { timeoutMs: 60_000 });
+    // Refresh the cached mirror, but don't fail the run on a flaky network: the cached copy is
+    // almost always current, and a stale base is better than no reproduction at all.
+    const res = await run('git', ['-C', mirror, 'remote', 'update', '--prune'], { timeoutMs: 20_000 });
+    if (res.code !== 0) console.warn(`mirror refresh failed (${res.timedOut ? 'timed out' : res.code}); using cached copy`);
   }
   await mustRun('git', ['clone', '--quiet', mirror, dir], { timeoutMs: 60_000 });
   await mustRun('git', ['-C', dir, 'checkout', '--quiet', config.targetRef]);

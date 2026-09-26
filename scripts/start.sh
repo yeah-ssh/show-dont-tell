@@ -9,6 +9,7 @@ command -v ffmpeg >/dev/null || { echo "ffmpeg is required (brew install ffmpeg 
 node -e 'const [a,b]=process.versions.node.split(".").map(Number); process.exit(a>22||(a===22&&b>=14)?0:1)' \
   || { echo "Node >= 22.14 is required"; exit 1; }
 
+python3 -c "import sys; sys.exit(0 if sys.version_info >= (3,10) else 1)" || { echo "python3 must be 3.10+ (TrueForge sandbox). brew install python"; exit 1; }
 [ -d node_modules ] || npm install
 npx playwright install chromium firefox >/dev/null
 

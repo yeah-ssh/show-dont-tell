@@ -88,7 +88,7 @@ Secrets (GitHub, Linear, Resend, model keys) live only in TrueForge and browser-
 
 ## Quickstart
 
-**You need:** macOS or Linux, Node ≥ 22.14, Python 3, ffmpeg, git, and the GitHub CLI logged in (`gh auth login`). All services are free tier.
+**You need:** macOS or Linux, Node ≥ 22.14, **Python ≥ 3.10 as `python3`** (TrueForge's sandbox uses it; on macOS the built-in 3.9 is too old, so `brew install python` and make sure `python3 --version` shows 3.10+), ffmpeg, git, and the GitHub CLI logged in (`gh auth login`). All services are free tier.
 
 ```bash
 git clone https://github.com/yeah-ssh/show-dont-tell && cd show-dont-tell
@@ -112,6 +112,12 @@ npm run dispatcher                              # :8910
 cloudflared tunnel --url http://localhost:8910  # public URL for the webhook
 ```
 In Linear → Settings → API → Webhooks, add `<tunnel-url>/linear-webhook` for **Issues** and copy the signing secret to `LINEAR_WEBHOOK_SECRET`. Adding the label `agent-resolve` to an issue now starts the agent.
+
+### Drive a ticket from the terminal
+```bash
+node scripts/run-ticket.mjs TRU-5                            # stops at each approval (finish in the UI)
+node scripts/run-ticket.mjs TRU-5 --approve=create_pull_request # auto-approve the PR, still stop at the reply
+```
 
 ### Check the lab on its own
 ```bash

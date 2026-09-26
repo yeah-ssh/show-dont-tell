@@ -203,7 +203,7 @@ async function configureAgent(model, mcpServers) {
     model: { name: model, params: { reasoning_effort: 'medium' } },
     instructions,
     mcp_servers: mcpServers,
-    skills: [{ name: 'ui-bug-repro', preload: true }],
+    skills: [{ name: 'ui-bug-repro' }],
     config: {
       sandbox: { enabled: true, file_downloads: true },
       generative_ui: { enabled: true },

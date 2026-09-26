@@ -38,12 +38,22 @@ if (!resumeId) await client.sessions.update(session.id, { title: `${issue} (cli)
 console.log(`session ${session.id}\n${TF}/sessions/${session.id}\n`);
 
 const toolNames = new Map();
-let input = [{
-  type: 'user.message',
-  content: resumeId
-    ? 'The previous turn was interrupted by a tool error. Check what already happened (e.g. whether the PR exists), redo only what is missing, and continue the procedure to the Verdict card.'
-    : `Resolve Linear issue ${issue}.`,
-}];
+let input = [{ type: 'user.message', content: `Resolve Linear issue ${issue}.` }];
+if (resumeId) {
+  // A resumed session may still hold approvals from an interrupted turn; answer those first.
+  const turns = await fetch(`${TF}/api/v1/sessions/${session.id}/turns?limit=1`).then(r => r.json());
+  const required = turns.data?.[0]?.state?.required_actions ?? [];
+  const pendingCalls = required.flatMap(a => (a.tool_calls ?? []).map(c => ({ id: c.id, threadId: a.thread_id })));
+  if (pendingCalls.length) {
+    console.log(`resuming: ${pendingCalls.length} pending approval(s) from the interrupted turn → allow`);
+    input = pendingCalls.map(c => ({ type: 'user.tool_approval', threadId: c.threadId, toolCallId: c.id, approval: { status: 'allow' } }));
+  } else {
+    input = [{
+      type: 'user.message',
+      content: 'The previous turn was interrupted by a tool error. Check what already happened (e.g. whether the PR exists), redo only what is missing, and continue the procedure to the Verdict card.',
+    }];
+  }
+}
 
 // Print full events from the REST API (the stream carries partial deltas).
 const seen = new Set();
@@ -104,7 +114,7 @@ for (let round = 0; round < 12; round++) {
       continue;
     }
     const m = state?.metrics;
-    console.log(`\n${stamp()} ✓ turn finished${m ? ` · cost $${m.totalCostInUsd ?? m.total_cost_in_usd ?? '?'}` : ''}`);
+    console.log(`\n${stamp()} ✓ turn finished${m ? ` · ${(m.totalTokens ?? m.total_tokens ?? 0).toLocaleString()} tokens (${(m.totalCacheReadTokens ?? m.total_cache_read_tokens ?? 0).toLocaleString()} cached)` : ''}`);
     break;
   }
   input = [];

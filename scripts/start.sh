@@ -16,7 +16,7 @@ npx playwright install chromium firefox >/dev/null
 mkdir -p .logs
 npm run lab > .logs/browser-lab.log 2>&1 &
 LAB_PID=$!
-SERVER_EXECUTION_TIMEOUT_SECONDS=1800 \
+SERVER_EXECUTION_TIMEOUT_SECONDS=1800 MCP_REQUEST_TIMEOUT_MS=120000 \
 OUTBOUND_URL_ALLOWED_HOSTS='["127.0.0.1","localhost"]' \
   npx -y @truefoundry/trueforge@0.2.1 > .logs/trueforge.log 2>&1 &
 TF_PID=$!

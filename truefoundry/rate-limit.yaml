@@ -10,6 +10,6 @@ rules:
     unit: requests_per_minute
   - id: vision-rpm
     when:
-      models: ['openai-main/gpt-5.4-mini']
+      models: ['openai-polaris/gpt-4o']
     limit_to: 20
     unit: requests_per_minute

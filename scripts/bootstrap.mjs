@@ -68,15 +68,28 @@ async function configureModel() {
   console.log('\n1. Model provider');
   const catalog = await api('GET', '/api/v1/catalogs/model-providers');
   const openaiCatalog = catalog.data.find(p => p.type === 'openai')?.models ?? [];
-  const props = modelId =>
-    openaiCatalog.find(m => m.model_id === modelId || modelId.endsWith(`/${m.model_id}`))?.properties ?? {
-      context_length: 400000,
-      max_output_tokens: 128000,
+  // Limits for models that aren't in TrueForge's OpenAI catalog (e.g. gateway-routed ones).
+  const KNOWN_LIMITS = {
+    'gpt-4o': { context_length: 128000, max_output_tokens: 16384 },
+    'gpt-4o-mini': { context_length: 128000, max_output_tokens: 16384 },
+    'gpt-4.1-mini': { context_length: 1047576, max_output_tokens: 32768 },
+  };
+  const props = modelId => {
+    const base = modelId.split('/').pop();
+    const found = openaiCatalog.find(m => m.model_id === modelId || m.model_id === base)?.properties ??
+      KNOWN_LIMITS[base] ?? { context_length: 128000, max_output_tokens: 16384 };
+    return {
+      ...found,
+      ...(env('AGENT_CONTEXT_LENGTH') ? { context_length: Number(env('AGENT_CONTEXT_LENGTH')) } : {}),
+      ...(env('AGENT_MAX_OUTPUT_TOKENS') ? { max_output_tokens: Number(env('AGENT_MAX_OUTPUT_TOKENS')) } : {}),
     };
+  };
   const hyphen = s => s.split('/').pop().replace(/[^a-z0-9]+/gi, '-').toLowerCase();
 
-  if (env('TFY_GATEWAY_BASE_URL') && env('TFY_API_KEY')) {
-    const modelId = env('TFY_AGENT_MODEL') || die('TFY_AGENT_MODEL is required with the TrueFoundry gateway (e.g. openai-main/gpt-5.6-sol)');
+  // The agent goes through the gateway only when TFY_AGENT_MODEL is set. With just the gateway
+  // URL + key, browser-lab's vision check uses the gateway and the agent talks to OpenAI directly.
+  if (env('TFY_GATEWAY_BASE_URL') && env('TFY_API_KEY') && env('TFY_AGENT_MODEL')) {
+    const modelId = env('TFY_AGENT_MODEL');
     const name = hyphen(modelId);
     await api('PUT', '/api/v1/settings/model-providers', {
       manifest: {
@@ -88,17 +101,18 @@ async function configureModel() {
       },
     });
     ok(`TrueFoundry AI Gateway → ${modelId}`);
-    return `tfy-gateway/${name}`;
+    return { name: `tfy-gateway/${name}`, reasoning: Boolean(props(modelId).reasoning_efforts) };
   }
 
-  const key = env('OPENAI_API_KEY') || die('Set OPENAI_API_KEY (or the TFY_* gateway variables) in .env');
+  if (env('TFY_GATEWAY_BASE_URL') && env('TFY_API_KEY')) ok('vision check routed through the TrueFoundry AI Gateway (agent direct: TFY_AGENT_MODEL is empty)');
+  const key = env('OPENAI_API_KEY') || die('Set OPENAI_API_KEY (or TFY_AGENT_MODEL with the gateway variables) in .env');
   const modelId = env('AGENT_MODEL', 'gpt-5.6-sol');
   const name = hyphen(modelId);
   await api('PUT', '/api/v1/settings/model-providers', {
     manifest: { type: 'openai', auth: { api_key: key }, models: [{ model_id: modelId, name, properties: props(modelId) }] },
   });
   ok(`OpenAI → ${modelId}`);
-  return `openai/${name}`;
+  return { name: `openai/${name}`, reasoning: Boolean(props(modelId).reasoning_efforts) };
 }
 
 async function putMcp(manifest) {
@@ -203,7 +217,8 @@ async function configureAgent(model, mcpServers) {
   const repoPath = TARGET_REPO.replace(/^https:\/\/github\.com\//, '').replace(/\.git$/, '');
   const instructions = readFileSync(join(root, 'agent', 'instructions.md'), 'utf8').replaceAll('{{TARGET_REPO}}', repoPath);
   const manifest = {
-    model: { name: model, params: { reasoning_effort: 'medium' } },
+    // reasoning_effort is only accepted for models whose catalog entry declares it.
+    model: { name: model.name, ...(model.reasoning ? { params: { reasoning_effort: 'medium' } } : {}) },
     instructions,
     mcp_servers: mcpServers,
     skills: [{ name: 'ui-bug-repro' }],

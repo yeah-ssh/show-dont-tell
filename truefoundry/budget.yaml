@@ -7,8 +7,8 @@ rules:
   - id: show-dont-tell-daily
     when:
       models:
-        - openai-main/gpt-5.6-sol    # agent loop (TrueForge)
-        - openai-main/gpt-5.4-mini   # vision double-check (browser-lab)
+        - openai-polaris/gpt-4o      # vision double-check (browser-lab) via the gateway
+        - openai-main/gpt-5.6-sol    # agent loop, when TFY_AGENT_MODEL routes it through the gateway
     limit_to: 5
     unit: cost_per_day
     budget_applies_per: ['model']

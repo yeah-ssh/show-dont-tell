@@ -138,7 +138,14 @@ Route every model call (the TrueForge agent loop and browser-lab's vision check)
 2. **AI Gateway → Models → Add Provider Account → OpenAI**. Name it `openai-main`, paste your OpenAI key, and enable `gpt-5.6-sol` and `gpt-5.4-mini`.
 3. **Settings → API Keys** → create a Personal Access Token.
 4. Open the **Playground → Code snippet** and copy the base URL.
-5. In `.env` set `TFY_GATEWAY_BASE_URL`, `TFY_API_KEY`, `TFY_AGENT_MODEL=openai-main/gpt-5.6-sol` and `TFY_VISION_MODEL=openai-main/gpt-5.4-mini`, then `node scripts/bootstrap.mjs`.
+5. In `.env` set `TFY_GATEWAY_BASE_URL`, `TFY_API_KEY` and `TFY_VISION_MODEL` (plus optionally `TFY_AGENT_MODEL`, see below), then `node scripts/bootstrap.mjs`. Paste the token on **one line**.
+
+**What we found testing the hackathon gateway** (tenant `odsc-demo`):
+- Tool calling works on `openai-polaris/gpt-4o` and on the Vertex Gemini models.
+- **Gemini via Vertex rejects some MCP tool schemas** (union `type` arrays in Linear/GitHub tools), so it can't drive this agent.
+- `gpt-4o` runs, but it's too weak for the full procedure: it skipped the reproduction.
+- So the default is split routing. Leave `TFY_AGENT_MODEL` empty: the **vision check goes through the gateway** (`TFY_VISION_MODEL=openai-polaris/gpt-4o`, tagged per ticket) and the agent uses `gpt-5.6-sol` directly.
+- Set `TFY_AGENT_MODEL` to route the agent too, once your gateway has a strong model with a valid upstream key (e.g. your own OpenAI key as a provider account).
 
 Apply the policies in [`truefoundry/`](truefoundry/) (`tfy apply -f truefoundry/budget.yaml`, or paste them into the console): a $5/day budget cap and per-model rate limits. Vision calls carry `X-TFY-METADATA` with `component=vision-check` and `ticket=<id>`, so spend shows per ticket.
 

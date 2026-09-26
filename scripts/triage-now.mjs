@@ -30,17 +30,13 @@ const run = (await call('POST', '/api/v1/schedules/runs', { schedule_id: schedul
 console.log(`Triggered ${schedule.name} (${schedule.manifest.cron} ${schedule.manifest.timezone}, ${schedule.manifest.status})`);
 console.log(`run ${run?.id ?? ''}: ${run?.status ?? 'triggered'}`);
 
-// Each run starts its own session ("Scheduled run"); find it and print the link.
+// Each run starts its own session ("Scheduled run") tagged with the run id; find it and print the link.
 for (let i = 0; i < 20; i++) {
-  const runs = (await call('GET', `/api/v1/schedules/${schedule.id}/runs`)).data ?? [];
-  const latest = runs.find(r => r.id === run?.id) ?? runs[0];
-  if (latest?.session_id) {
-    console.log(`session → ${TF}/sessions/${latest.session_id}`);
+  const sessions = (await call('GET', '/api/v1/sessions?limit=10')).data ?? [];
+  const session = sessions.find(x => x.source?.run_id === run?.id);
+  if (session) {
+    console.log(`session → ${TF}/sessions/${session.id}`);
     process.exit(0);
-  }
-  if (latest?.status === 'failed') {
-    console.error(`run failed: ${latest.reason}`);
-    process.exit(1);
   }
   await new Promise(r => setTimeout(r, 1500));
 }

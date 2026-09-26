@@ -25,28 +25,28 @@
       "visual": "footage:linear-ticket",
       "chip": "Linear",
       "narration": "It starts where your team already works. A real ticket in Linear: a customer can't check out on their phone. On a laptop, everything looks fine.",
-      "pad_after": 0.4
+      "pad_after": 2.4
     },
     {
       "id": "05-investigate",
       "visual": "footage:trueforge-investigate",
       "chip": "TrueForge",
       "narration": "The agent picks it up inside TrueForge. It lays out a plan, then reads the code in TrueForge's sandbox, and forms a hypothesis before it touches anything.",
-      "pad_after": 0.4
+      "pad_after": 2.4
     },
     {
       "id": "06-reproduce",
       "visual": "footage:trueforge-reproduce",
-      "chip": "TrueForge · Browser Lab",
+      "chip": "Browser Lab",
       "narration": "Then it proves it. It writes a browser check for what the customer expects, and runs it in an isolated browser lab. Desktop passes. On a phone, it fails. Reproduced.",
-      "pad_after": 0.4
+      "pad_after": 2.4
     },
     {
       "id": "07-evidence",
       "visual": "footage:evidence",
       "chip": "Browser Lab",
       "narration": "It fixes the code, and runs the exact same check on a fresh copy of the app. Now it passes. A vision model confirms it independently. Before, and after. Proof, not a promise.",
-      "pad_after": 0.6
+      "pad_after": 2.6
     },
     {
       "id": "08-gates",
@@ -57,36 +57,36 @@
     {
       "id": "09-approve-pr",
       "visual": "footage:approve-and-pr",
-      "chip": "TrueForge → GitHub",
+      "chip": "TrueForge \u2192 GitHub",
       "narration": "One click, and the pull request lands on GitHub, with the video and a full verification record inside.",
-      "pad_after": 0.5
+      "pad_after": 2.5
     },
     {
       "id": "10-reply",
       "visual": "footage:reply",
-      "chip": "TrueForge → Linear",
+      "chip": "TrueForge \u2192 Linear",
       "narration": "Approve the reply, and the customer gets what they actually needed: a video of their bug, fixed.",
-      "pad_after": 0.5
+      "pad_after": 2.5
     },
     {
       "id": "11-judgment",
       "visual": "footage:judgment",
       "chip": "TrueForge",
       "narration": "When it can't reproduce a bug, it says so honestly, and asks one precise question. And when a ticket tries to hijack it, it refuses, and flags it.",
-      "pad_after": 0.5
+      "pad_after": 2.5
     },
     {
       "id": "12-schedule",
       "visual": "footage:schedule",
       "chip": "TrueForge Schedules",
       "narration": "It doesn't even need to be asked. A TrueForge schedule sweeps your queue every hour, triages it, and takes the oldest bug. Autonomy, with a human on the leash.",
-      "pad_after": 0.5
+      "pad_after": 2.5
     },
     {
       "id": "13-architecture",
       "visual": "scene:architecture",
       "narration": "Under the hood, it's all TrueForge. The sandbox, skills, MCP connectors for Linear, GitHub and our browser lab, tool approvals, generative UI, schedules and sessions. Open source, and one command to run.",
-      "pad_after": 0.8
+      "pad_after": 1.8
     },
     {
       "id": "14-close",

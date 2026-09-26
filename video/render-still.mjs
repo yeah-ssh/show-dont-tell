@@ -13,6 +13,7 @@ export async function renderStills(jobs) {
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
   for (const job of jobs) {
     const url = pathToFileURL(join(here, 'scenes', `${job.scene}.html`));
+    url.search = `?n=${jobs.indexOf(job)}`; // a hash-only change wouldn't reload the page
     url.hash = encodeURIComponent(JSON.stringify(job.params ?? {}));
     await page.goto(url.href, { waitUntil: 'load' });
     await page.evaluate(async () => {

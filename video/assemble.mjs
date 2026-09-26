@@ -105,7 +105,8 @@ function footageClip(s, out) {
     }
     ff([...inputs, '-filter_complex', chain.slice(0, -1), '-map', '[v]', '-c:v', 'libx264', '-crf', '16', '-preset', 'fast', '-pix_fmt', 'yuv420p', raw], `join ${s.id}`);
   }
-  // Frame it: backdrop + footage in a rounded window with a slow push-in.
+  // Frame it: backdrop + footage in a rounded window. (A per-frame push-in resized the stream mid-graph,
+  // which alphamerge can't handle; the footage itself carries the motion.)
   const frame = join(WORK, `frame-${chips.indexOf(s.chip)}.png`);
   const D = s.duration.toFixed(3);
   ff([
@@ -113,7 +114,7 @@ function footageClip(s, out) {
     '-i', raw,
     '-loop', '1', '-t', D, '-i', join(WORK, 'mask.png'),
     '-filter_complex',
-    `[1:v]scale=w='trunc(1680*(1+0.03*t/${D})/2)*2':h=-2:eval=frame,crop=1680:945,setsar=1[f];` +
+    `[1:v]scale=1680:945,setsar=1,format=yuv420p[f];` +
       `[2:v]crop=1680:945:120:90,format=gray[m];` +
       `[f][m]alphamerge[fm];[0:v][fm]overlay=120:90:shortest=1,fps=${FPS},format=yuv420p[v]`,
     '-map', '[v]', '-t', D, '-c:v', 'libx264', '-crf', '16', '-preset', 'fast', out,

@@ -1,32 +1,159 @@
 {
   "_comment": "Footage windows per scene. from/to in seconds of the source; crop zooms into the region that matters (16:9). Segments share the scene's duration by weight and are sped up to fit. Times in live.mp4/live2.mp4 come from the TRU-16 session's event timestamps.",
   "linear-ticket": [
-    { "src": "linear-ticket.mp4", "from": 2.5, "to": 18.5, "crop": { "x": 300, "y": 20, "w": 1440, "h": 810 } }
+    {
+      "src": "linear-ticket.mp4",
+      "from": 2.5,
+      "to": 18.5,
+      "crop": {
+        "x": 300,
+        "y": 20,
+        "w": 1440,
+        "h": 810
+      }
+    }
   ],
   "trueforge-investigate": [
-    { "src": "live.mp4", "from": 2.5, "to": 10, "weight": 0.4, "crop": { "x": 520, "y": 396, "w": 1216, "h": 684 } },
-    { "src": "live.mp4", "from": 10, "to": 57, "weight": 0.6, "crop": { "x": 520, "y": 40, "w": 1216, "h": 684 } }
+    {
+      "src": "live.mp4",
+      "from": 2.5,
+      "to": 10,
+      "weight": 0.4,
+      "crop": {
+        "x": 336,
+        "y": 189,
+        "w": 1584,
+        "h": 891
+      }
+    },
+    {
+      "src": "live.mp4",
+      "from": 10,
+      "to": 57,
+      "weight": 0.6,
+      "crop": {
+        "x": 336,
+        "y": 0,
+        "w": 1584,
+        "h": 891
+      }
+    }
   ],
   "trueforge-reproduce": [
-    { "src": "live.mp4", "from": 57, "to": 104, "crop": { "x": 520, "y": 300, "w": 1216, "h": 684 } }
+    {
+      "src": "lab-desktop-pass.mp4",
+      "from": 0,
+      "weight": 0.4
+    },
+    {
+      "src": "lab-mobile-fail.mp4",
+      "from": 0,
+      "speed": 1,
+      "weight": 0.6
+    }
   ],
   "evidence": [
-    { "src": "evidence.mp4", "from": 0, "speed": 1 }
+    {
+      "src": "evidence.mp4",
+      "from": 0,
+      "speed": 1
+    }
   ],
   "approve-and-pr": [
-    { "src": "live2.mp4", "from": 0.3, "to": 7.5, "weight": 1, "speed": 1.2, "crop": { "x": 520, "y": 396, "w": 1216, "h": 684 } },
-    { "src": "pr.mp4", "from": 0, "to": 12, "weight": 1.2, "crop": { "x": 148, "y": 0, "w": 1280, "h": 720 } }
+    {
+      "src": "live2.mp4",
+      "from": 0.3,
+      "to": 7.5,
+      "weight": 1,
+      "speed": 1.2,
+      "crop": {
+        "x": 336,
+        "y": 189,
+        "w": 1584,
+        "h": 891
+      }
+    },
+    {
+      "src": "pr.mp4",
+      "from": 0,
+      "to": 12,
+      "weight": 1.2,
+      "crop": {
+        "x": 148,
+        "y": 0,
+        "w": 1280,
+        "h": 720
+      }
+    }
   ],
   "reply": [
-    { "src": "live2.mp4", "from": 25, "to": 36, "weight": 1, "crop": { "x": 520, "y": 396, "w": 1216, "h": 684 } },
-    { "src": "linear-after.mp4", "from": 0, "to": 9, "weight": 1.3, "crop": { "x": 300, "y": 20, "w": 1440, "h": 810 } }
+    {
+      "src": "live2.mp4",
+      "from": 25,
+      "to": 36,
+      "weight": 1,
+      "crop": {
+        "x": 336,
+        "y": 189,
+        "w": 1584,
+        "h": 891
+      }
+    },
+    {
+      "src": "linear-after.mp4",
+      "from": 0,
+      "to": 9,
+      "weight": 1.3,
+      "crop": {
+        "x": 300,
+        "y": 20,
+        "w": 1440,
+        "h": 810
+      }
+    }
   ],
   "judgment": [
-    { "src": "honest.mp4", "from": 0, "to": 9, "crop": { "x": 520, "y": 200, "w": 1216, "h": 684 } },
-    { "src": "injection-linear.mp4", "from": 0, "to": 9, "crop": { "x": 300, "y": 20, "w": 1440, "h": 810 } }
+    {
+      "src": "honest.mp4",
+      "from": 0,
+      "to": 9,
+      "crop": {
+        "x": 520,
+        "y": 200,
+        "w": 1216,
+        "h": 684
+      }
+    },
+    {
+      "src": "injection-linear.mp4",
+      "from": 0,
+      "to": 9,
+      "crop": {
+        "x": 300,
+        "y": 20,
+        "w": 1440,
+        "h": 810
+      }
+    }
   ],
   "schedule": [
-    { "src": "schedules.mp4", "from": 0, "to": 10.8, "weight": 0.8 },
-    { "src": "triage.mp4", "from": 0, "to": 9, "weight": 1.2, "crop": { "x": 520, "y": 150, "w": 1216, "h": 684 } }
+    {
+      "src": "schedules.mp4",
+      "from": 0,
+      "to": 10.8,
+      "weight": 0.8
+    },
+    {
+      "src": "triage.mp4",
+      "from": 0,
+      "to": 9,
+      "weight": 1.2,
+      "crop": {
+        "x": 520,
+        "y": 150,
+        "w": 1216,
+        "h": 684
+      }
+    }
   ]
 }

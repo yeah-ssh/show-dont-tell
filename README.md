@@ -20,7 +20,7 @@ Built for **Agents That Act** (TrueFoundry × Polaris), theme: Ticket Resolver.
 |---|---|
 | Bug reproduces | A patch, a PR with a before/after video, and a customer reply with the video, waiting for your approval |
 | Bug doesn't reproduce | No patch. A video of every environment it tried, a clearly labelled hypothesis, and one precise question for the customer |
-| Ticket tries to manipulate the agent | Refuses, and flags it in an internal note |
+| Ticket tries to manipulate the agent | Ignores the injected instruction, flags it in an internal note, and handles only the real bug |
 
 ## How it works
 
@@ -138,6 +138,9 @@ See [`.env.example`](.env.example). The important ones:
 | `EVIDENCE_REPO` | Public repo where videos and GIFs are published (default `yeah-ssh/show-dont-tell-evidence`) |
 | `RESEND_API_KEY`, `REPLY_OVERRIDE_TO` | Real email delivery; the override sends every reply to you during demos |
 | `LAB_RUNNER` | `host` (default) or `docker` |
+
+## Demo
+See [docs/DEMO.md](docs/DEMO.md) for the 5-minute script and likely judge questions.
 
 ## Repo layout
 ```

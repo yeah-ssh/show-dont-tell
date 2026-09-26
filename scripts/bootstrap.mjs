@@ -134,6 +134,7 @@ async function configureMcp() {
     servers.push({
       name: 'ticket-tools',
       enable_tools: pick([...LINEAR_TOOLS, ...GITHUB_TOOLS], available, 'ticket-tools'),
+      preload: true,
       require_approval_for_tools: ['create_pull_request'],
     });
   } else {
@@ -145,7 +146,7 @@ async function configureMcp() {
       description: 'Linear: read bug tickets, comment, update status.',
       auth: { type: 'header', headers: { Authorization: `Bearer ${linearKey}` } },
     });
-    servers.push({ name: 'linear', enable_tools: pick(LINEAR_TOOLS, linear, 'linear'), require_approval_for_tools: [] });
+    servers.push({ name: 'linear', enable_tools: pick(LINEAR_TOOLS, linear, 'linear'), preload: true, require_approval_for_tools: [] });
 
     const gh = githubToken() || die('Set GITHUB_TOKEN in .env or run `gh auth login`');
     const github = await putMcp({
@@ -158,7 +159,7 @@ async function configureMcp() {
     servers.push({
       name: 'github',
       enable_tools: pick(GITHUB_TOOLS, github, 'github'),
-      preload_tools: ['create_pull_request'],
+      preload: true,
       require_approval_for_tools: ['create_pull_request'],
     });
   }
@@ -173,7 +174,7 @@ async function configureMcp() {
   servers.push({
     name: 'browser-lab',
     enable_tools: pick(LAB_TOOLS, lab, 'browser-lab'),
-    preload_tools: ['run_repro', 'compose_evidence'],
+    preload: true,
     require_approval_for_tools: ['send_customer_reply'],
   });
   return servers;

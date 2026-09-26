@@ -14,20 +14,28 @@ async function publishToGitHub(localPath: string, remoteName: string): Promise<s
   if (!config.githubToken) throw new Error('EVIDENCE_STORE=github needs GITHUB_TOKEN (or `gh auth login`)');
   const [owner, repo] = config.evidenceRepo.split('/');
   const content = (await readFile(localPath)).toString('base64');
-  const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${remoteName}`, {
-    method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${config.githubToken}`,
-      Accept: 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-    },
-    body: JSON.stringify({
-      message: `evidence: ${basename(remoteName)}`,
-      content,
-      branch: config.evidenceBranch,
-    }),
-  });
-  if (!res.ok) throw new Error(`GitHub upload failed (${res.status}): ${(await res.text()).slice(0, 300)}`);
+  // Concurrent runs commit to the same branch; GitHub answers 409 when the branch moved underneath us.
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${remoteName}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${config.githubToken}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+      body: JSON.stringify({
+        message: `evidence: ${basename(remoteName)}`,
+        content,
+        branch: config.evidenceBranch,
+      }),
+    });
+    if (res.ok) break;
+    if ((res.status === 409 || res.status === 422) && attempt < 4) {
+      await new Promise(r => setTimeout(r, 500 + Math.random() * 1500));
+      continue;
+    }
+    throw new Error(`GitHub upload failed (${res.status}): ${(await res.text()).slice(0, 300)}`);
+  }
   return `https://raw.githubusercontent.com/${owner}/${repo}/${config.evidenceBranch}/${remoteName}`;
 }
 

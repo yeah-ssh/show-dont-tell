@@ -47,8 +47,16 @@ async function printNewEvents() {
       const text = Array.isArray(ev.content) ? ev.content.map(c => c.text ?? '').join('') : ev.content;
       if (text?.trim()) console.log(`${stamp()} 💬 ${short(text, 500)}`);
       for (const call of ev.tool_calls ?? []) {
-        toolNames.set(call.id, call.function?.name);
-        console.log(`${stamp()} 🔧 ${call.function?.name}(${short(call.function?.arguments, 220)})`);
+        let name = call.function?.name;
+        // Deferred tools arrive as call_tool({mcp_server, tool_name, input}); show the real tool.
+        if (name === 'call_tool') {
+          try {
+            const a = JSON.parse(call.function.arguments);
+            name = `${a.mcp_server}.${a.tool_name}`;
+          } catch {}
+        }
+        toolNames.set(call.id, name);
+        console.log(`${stamp()} 🔧 ${name}(${short(call.function?.arguments, 220)})`);
       }
     } else if (ev.type === 'tool.response') {
       console.log(`${stamp()}    ↳ ${toolNames.get(ev.tool_call_id) ?? ''}: ${short(ev.content, 260)}`);
@@ -83,7 +91,7 @@ for (let round = 0; round < 10; round++) {
   }
   input = [];
   for (const p of pending) {
-    const name = toolNames.get(p.id) ?? '?';
+    const name = (toolNames.get(p.id) ?? '?').split('.').pop();
     if (approve.has(name)) {
       console.log(`${stamp()} ⏸  approval: ${name} → ALLOW (cli flag)`);
       input.push({ type: 'user.tool_approval', threadId: p.threadId, toolCallId: p.id, approval: { status: 'allow' } });

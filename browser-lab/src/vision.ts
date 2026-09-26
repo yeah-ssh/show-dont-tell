@@ -33,6 +33,8 @@ export async function verifyScreens(params: {
         `Correct behaviour expected by the customer: ${params.expectation}\n` +
         `Judge only from the screenshots. Reply as JSON: ` +
         `{"bug_visible_before": bool|null, "fixed_after": bool|null, "confidence": 0..1, "notes": "one or two sentences"}. ` +
+        `bug_visible_before = true when the BEFORE screenshot shows the app FAILING the expectation (the bug is present). ` +
+        `fixed_after = true when the AFTER screenshot shows the app MEETING the expectation. ` +
         `Use null for a screenshot that was not provided.`,
     },
   ];

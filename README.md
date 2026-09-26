@@ -119,6 +119,29 @@ node scripts/run-ticket.mjs TRU-5                            # stops at each app
 node scripts/run-ticket.mjs TRU-5 --approve=create_pull_request # auto-approve the PR, still stop at the reply
 ```
 
+### Auto-triage: TrueForge picks up tickets by itself
+`bootstrap.mjs` creates a **TrueForge Schedule** named `bug-triage-sweep` (hourly, `Asia/Kolkata`). Every run:
+1. Lists open Linear issues.
+2. Shows a Triage card (queue, age, classification).
+3. Claims the oldest untouched UI bug with the label `agent-handled`.
+4. Resolves it with video proof, and still stops at the approval gates.
+
+Each run is its own session, marked *Scheduled run* in TrueForge.
+```bash
+node scripts/triage-now.mjs     # "Run now" from the terminal (or TrueForge → Schedules → Run now)
+```
+Set `TRIAGE_SCHEDULE=paused` in `.env` (then re-run bootstrap) to stop the hourly sweep.
+
+### TrueFoundry AI Gateway (optional, 5 steps)
+Route every model call (the TrueForge agent loop and browser-lab's vision check) through TrueFoundry's AI Gateway, for budgets, rate limits, request logs and cost per ticket:
+1. Sign up at [truefoundry.com](https://www.truefoundry.com) (free Developer plan).
+2. **AI Gateway → Models → Add Provider Account → OpenAI**. Name it `openai-main`, paste your OpenAI key, and enable `gpt-5.6-sol` and `gpt-5.4-mini`.
+3. **Settings → API Keys** → create a Personal Access Token.
+4. Open the **Playground → Code snippet** and copy the base URL.
+5. In `.env` set `TFY_GATEWAY_BASE_URL`, `TFY_API_KEY`, `TFY_AGENT_MODEL=openai-main/gpt-5.6-sol` and `TFY_VISION_MODEL=openai-main/gpt-5.4-mini`, then `node scripts/bootstrap.mjs`.
+
+Apply the policies in [`truefoundry/`](truefoundry/) (`tfy apply -f truefoundry/budget.yaml`, or paste them into the console): a $5/day budget cap and per-model rate limits. Vision calls carry `X-TFY-METADATA` with `component=vision-check` and `ticket=<id>`, so spend shows per ticket.
+
 ### Check the lab on its own
 ```bash
 npm run lab                     # :8900

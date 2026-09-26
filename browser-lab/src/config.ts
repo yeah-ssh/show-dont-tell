@@ -50,6 +50,7 @@ export const config = {
   githubToken: ghToken(),
 
   // Vision double-check. Point OPENAI_BASE_URL at the TrueFoundry AI Gateway to route through it.
+  viaGateway: Boolean(env('TFY_GATEWAY_BASE_URL') && env('TFY_API_KEY')),
   ...(env('TFY_GATEWAY_BASE_URL') && env('TFY_API_KEY')
     ? {
         openaiApiKey: env('TFY_API_KEY'),

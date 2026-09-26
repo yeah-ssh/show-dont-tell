@@ -1,0 +1,17 @@
+# TrueFoundry AI Gateway: daily spend cap for the Show-Don't-Tell agent.
+# Apply with `tfy apply -f truefoundry/budget.yaml` or paste into AI Gateway → Config → Budget Limiting.
+# The free Developer plan includes one budget rule.
+name: show-dont-tell-budget
+type: gateway-budget-config
+rules:
+  - id: show-dont-tell-daily
+    when:
+      models:
+        - openai-main/gpt-5.6-sol    # agent loop (TrueForge)
+        - openai-main/gpt-5.4-mini   # vision double-check (browser-lab)
+    limit_to: 5
+    unit: cost_per_day
+    budget_applies_per: ['model']
+    audit_mode: false
+    alerts:
+      thresholds: [75, 90, 100]

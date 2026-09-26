@@ -20,11 +20,16 @@ export async function verifyScreens(params: {
   expectation: string;
   before?: RunMeta;
   after?: RunMeta;
+  ticket?: string;
 }): Promise<VisionVerdict> {
   if (!config.openaiApiKey) {
     return { bug_visible_before: null, fixed_after: null, confidence: 0, notes: 'Vision check skipped: no API key configured.', model: 'none' };
   }
-  const client = new OpenAI({ apiKey: config.openaiApiKey, baseURL: config.openaiBaseUrl });
+  // Through the TrueFoundry AI Gateway, tag each call so spend shows per ticket in the gateway dashboard.
+  const defaultHeaders = config.viaGateway
+    ? { 'X-TFY-METADATA': JSON.stringify({ app: 'show-dont-tell', component: 'vision-check', ticket: params.ticket ?? 'unknown' }) }
+    : undefined;
+  const client = new OpenAI({ apiKey: config.openaiApiKey, baseURL: config.openaiBaseUrl, defaultHeaders });
   const content: OpenAI.Chat.Completions.ChatCompletionContentPart[] = [
     {
       type: 'text',

@@ -8,6 +8,8 @@ It picks up a bug ticket from Linear, reproduces the bug in an isolated browser,
 
 *Real output from the lab: the agent's check fails on the unpatched app, and the lab circles the failure. The same check passes with the patch.*
 
+🎬 **[Watch the 2-minute launch video](https://github.com/yeah-ssh/show-dont-tell/releases/download/launch-video-v1/show-dont-tell-launch.mp4)** (real footage: Linear → TrueForge → Browser Lab → GitHub, with on-camera approvals). It was rendered by the pipeline in [`video/`](video/).
+
 Built for **Agents That Act** (TrueFoundry × Polaris), theme: Ticket Resolver.
 
 ---

@@ -41,8 +41,9 @@ const toolNames = new Map();
 let input = [{ type: 'user.message', content: `Resolve Linear issue ${issue}.` }];
 if (resumeId) {
   // A resumed session may still hold approvals from an interrupted turn; answer those first.
-  const turns = await fetch(`${TF}/api/v1/sessions/${session.id}/turns?limit=1`).then(r => r.json());
-  const required = turns.data?.[0]?.state?.required_actions ?? [];
+  // Turns are listed oldest-first; the newest one is last.
+  const turns = await fetch(`${TF}/api/v1/sessions/${session.id}/turns?limit=100`).then(r => r.json());
+  const required = turns.data?.at(-1)?.state?.required_actions ?? [];
   const pendingCalls = required.flatMap(a => (a.tool_calls ?? []).map(c => ({ id: c.id, threadId: a.thread_id })));
   if (pendingCalls.length) {
     console.log(`resuming: ${pendingCalls.length} pending approval(s) from the interrupted turn → allow`);

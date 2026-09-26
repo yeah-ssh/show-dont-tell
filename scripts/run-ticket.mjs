@@ -67,7 +67,8 @@ async function printNewEvents() {
 }
 const poller = setInterval(() => void printNewEvents(), 2500);
 
-for (let round = 0; round < 10; round++) {
+let nudges = 0;
+for (let round = 0; round < 12; round++) {
   const pending = [];
   let done;
   const stream = await client.sessions.createTurnStream(session.id, { input });
@@ -85,6 +86,14 @@ for (let round = 0; round < 10; round++) {
     break;
   }
   if (!pending.length) {
+    // Models occasionally end a turn early. If there's no Verdict yet, nudge once or twice.
+    const finalText = JSON.stringify(state?.output ?? '');
+    if (!/verdict/i.test(finalText) && nudges < 2) {
+      nudges++;
+      console.log(`${stamp()} ↻ turn ended without a Verdict; nudging to continue (${nudges}/2)`);
+      input = [{ type: 'user.message', content: 'Continue the ui-bug-repro procedure from where you stopped, through to the Verdict card.' }];
+      continue;
+    }
     const m = state?.metrics;
     console.log(`\n${stamp()} ✓ turn finished${m ? ` · cost $${m.totalCostInUsd ?? m.total_cost_in_usd ?? '?'}` : ''}`);
     break;

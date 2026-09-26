@@ -51,10 +51,35 @@ async function startSession(identifier: string, title: string) {
   });
   await client.sessions.update(session.id, { title: `${identifier}: ${title}` });
   console.log(`[${identifier}] session ${session.id} started`);
-  const { data: turn } = await client.sessions.createTurn(session.id, {
-    input: [{ type: 'user.message', content: `Resolve Linear issue ${identifier} ("${title}").` }],
-  });
-  console.log(`[${identifier}] turn ${turn.id} → ${process.env.TRUEFORGE_URL || 'http://localhost:8790'}`);
+  let message = `Resolve Linear issue ${identifier} ("${title}").`;
+  // Models occasionally end a turn early; nudge up to twice if there's no Verdict and nothing awaits approval.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const { data: created } = await client.sessions.createTurn(session.id, {
+      input: [{ type: 'user.message', content: message }],
+    });
+    console.log(`[${identifier}] turn ${created.id} → ${process.env.TRUEFORGE_URL || 'http://localhost:8790'}/sessions/${session.id}`);
+    const turn = await waitForTurn(session.id, created.id);
+    const state = JSON.stringify(turn.state ?? {});
+    if (/required_?actions"\s*:\s*\[\s*\{/i.test(state)) {
+      console.log(`[${identifier}] waiting for human approval in TrueForge`);
+      return;
+    }
+    if (/verdict/i.test(state)) {
+      console.log(`[${identifier}] finished`);
+      return;
+    }
+    message = 'Continue the ui-bug-repro procedure from where you stopped, through to the Verdict card.';
+    console.log(`[${identifier}] turn ended without a Verdict; nudging (${attempt + 1}/2)`);
+  }
+}
+
+async function waitForTurn(sessionId: string, turnId: string) {
+  for (;;) {
+    const { data: turn } = await client.sessions.getTurn(sessionId, turnId);
+    const status = (turn.state as { status?: string } | undefined)?.status;
+    if (status && status !== 'running' && status !== 'queued') return turn;
+    await new Promise(r => setTimeout(r, 3000));
+  }
 }
 
 const app = express();

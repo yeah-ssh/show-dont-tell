@@ -1,0 +1,42 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css">
+<style>
+  .pre { font-size: 38px; color: #9b9ba6; font-weight: 500; opacity: 0; text-align: center; margin-bottom: 26px; }
+  .title { font-size: 190px; font-weight: 800; letter-spacing: -0.05em; line-height: 1; text-align: center; opacity: 0; }
+  .built { margin-top: 56px; display: flex; justify-content: center; align-items: center; gap: 22px; opacity: 0; }
+  .built .label { font-size: 30px; color: #a9a9b3; font-weight: 500; letter-spacing: 0.02em; }
+  .built img { height: 46px; }
+  .ring { position: absolute; left: 50%; top: 50%; width: 10px; height: 10px; border-radius: 50%;
+          border: 2px solid rgba(160,150,255,0.6); transform: translate(-50%,-50%); opacity: 0; }
+</style></head>
+<body>
+  <div class="glow violet" style="width:1100px;height:900px;left:410px;top:90px;opacity:0"></div>
+  <div class="glow teal" style="width:700px;height:700px;left:1100px;top:380px;opacity:0"></div>
+  <div class="ring"></div>
+  <div class="stage content">
+    <div>
+      <div class="pre">Introducing</div>
+      <div class="title gradient-text">Show, Don’t Tell.</div>
+      <div class="built"><span class="label">Built on</span><img src="../assets/trueforge-white.svg" alt="TrueForge"></div>
+    </div>
+  </div>
+  <script src="../node_modules/gsap/dist/gsap.min.js"></script>
+  <script src="lib.js"></script>
+  <script>
+    window.build = D => {
+      const tl = gsap.timeline({ paused: true });
+      drift(tl, D);
+      tl.to('.glow.violet', { opacity: 0.55, duration: 1.6, ease: 'sine.out' }, 0.3);
+      tl.to('.glow.teal', { opacity: 0.35, duration: 1.6, ease: 'sine.out' }, 1.2);
+      const t0 = Math.max(0.2, D * 0.28);
+      tl.fromTo('.pre', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, t0);
+      tl.fromTo('.ring', { opacity: 0.9, width: 10, height: 10 }, { opacity: 0, width: 1800, height: 1800, duration: 1.8, ease: 'power2.out' }, t0 + 0.55);
+      tl.fromTo('.title', { opacity: 0, scale: 1.08, letterSpacing: '0.02em', filter: 'blur(16px)' },
+        { opacity: 1, scale: 1, letterSpacing: '-0.05em', filter: 'blur(0px)', duration: 1.4, ease: 'expo.out' }, t0 + 0.5);
+      tl.fromTo('.built', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out' }, t0 + 1.8);
+      tl.to('.content', { scale: 1.03, duration: D, ease: 'none' }, 0);
+      outro(tl, D, 0.6);
+      return tl;
+    };
+  </script>
+</body></html>

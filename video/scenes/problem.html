@@ -1,0 +1,55 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css">
+<style>
+  .quote { font-size: 118px; font-weight: 700; letter-spacing: -0.04em; color: #fff; text-align: center; }
+  .quote .q { color: #5b5b66; }
+  .tickets { position: absolute; inset: 0; }
+  .ticket {
+    position: absolute; width: 420px; padding: 22px 26px; border-radius: 18px;
+    background: rgba(255,255,255,0.045); border: 1px solid rgba(255,255,255,0.09);
+    backdrop-filter: blur(6px); opacity: 0;
+  }
+  .ticket .id { font-size: 18px; color: #7d7d88; font-weight: 600; letter-spacing: 0.04em; }
+  .ticket .t { font-size: 24px; color: #dcdce3; margin-top: 8px; font-weight: 500; }
+  .ticket .stamp {
+    display: inline-block; margin-top: 14px; font-size: 16px; font-weight: 700; letter-spacing: 0.08em;
+    color: #ff6b78; border: 1.5px solid #ff6b78; border-radius: 6px; padding: 4px 10px; text-transform: uppercase;
+  }
+  .beats { position: absolute; bottom: 150px; width: 100%; display: flex; justify-content: center; gap: 70px; }
+  .beat { font-size: 44px; font-weight: 600; color: #a3a3ad; opacity: 0; letter-spacing: -0.01em; }
+</style></head>
+<body>
+  <div class="glow rose" style="width:800px;height:800px;left:560px;top:80px;opacity:.28"></div>
+  <div class="tickets" id="tickets"></div>
+  <div class="stage content"><div class="quote" id="quote"><span class="q">“</span>We couldn’t reproduce it.<span class="q">”</span></div></div>
+  <div class="beats content">
+    <div class="beat">Customers wait.</div>
+    <div class="beat">Support guesses.</div>
+    <div class="beat">Engineering never sees it.</div>
+  </div>
+  <script src="../node_modules/gsap/dist/gsap.min.js"></script>
+  <script src="lib.js"></script>
+  <script>
+    const T = [
+      ['BUG-1042', 'Checkout missing on mobile', 160, 120, -6],
+      ['BUG-1058', 'Discount applied twice', 1340, 150, 5],
+      ['BUG-1061', 'Page freezes on Safari', 110, 690, 4],
+      ['BUG-1077', 'Wrong currency at checkout', 1390, 700, -5],
+      ['BUG-1080', 'Button does nothing', 760, 60, 2],
+    ];
+    document.getElementById('tickets').innerHTML = T.map(([id, t, x, y, r]) =>
+      `<div class="ticket" style="left:${x}px;top:${y}px;transform:rotate(${r}deg)"><div class="id">${id}</div><div class="t">${t}</div><div class="stamp">Can't reproduce</div></div>`).join('');
+    window.build = D => {
+      const tl = gsap.timeline({ paused: true });
+      drift(tl, D);
+      tl.fromTo('#quote', { opacity: 0, scale: 0.94, filter: 'blur(10px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 1.1, ease: 'power3.out' }, 0.1);
+      tl.fromTo('.ticket', { opacity: 0, y: 60 }, { opacity: 0.9, y: 0, duration: 0.9, stagger: 0.35, ease: 'power3.out' }, 1.6);
+      tl.to('.ticket', { y: '+=18', duration: D, ease: 'sine.inOut' }, 1.6);
+      tl.to('#quote', { y: -90, scale: 0.8, duration: 1, ease: 'power2.inOut' }, D * 0.42);
+      tl.fromTo('.beat', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, stagger: D * 0.14, ease: 'power3.out' }, D * 0.45);
+      tl.to('.beat:last-child', { color: '#ffffff', duration: 0.5 }, D * 0.45 + D * 0.28 + 0.4);
+      outro(tl, D, 0.6, '.content, .ticket');
+      return tl;
+    };
+  </script>
+</body></html>

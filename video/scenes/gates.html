@@ -1,0 +1,54 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css">
+<style>
+  .head { font-size: 76px; font-weight: 700; letter-spacing: -0.035em; text-align: center; opacity: 0; }
+  .head em { font-style: normal; color: #ffb454; }
+  .cards { display: flex; gap: 60px; justify-content: center; margin-top: 80px; }
+  .card {
+    width: 620px; padding: 44px 48px; border-radius: 28px; opacity: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025));
+    border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 40px 80px rgba(0,0,0,0.45);
+  }
+  .card .icon { font-size: 54px; }
+  .card .name { font-size: 44px; font-weight: 700; margin-top: 18px; letter-spacing: -0.02em; }
+  .card .why { font-size: 27px; color: #9a9aa5; margin-top: 10px; }
+  .status { margin-top: 34px; height: 64px; position: relative; }
+  .st { position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; gap: 14px;
+        padding: 14px 24px; border-radius: 999px; font-size: 26px; font-weight: 600; }
+  .wait { background: rgba(255,180,84,0.12); color: #ffc071; border: 1px solid rgba(255,180,84,0.35); }
+  .ok { background: rgba(34,197,94,0.12); color: #6ee79a; border: 1px solid rgba(34,197,94,0.35); opacity: 0; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: currentColor; }
+</style></head>
+<body>
+  <div class="glow violet" style="width:900px;height:800px;left:120px;top:200px;opacity:.3"></div>
+  <div class="glow teal" style="width:800px;height:700px;left:1000px;top:260px;opacity:.22"></div>
+  <div class="stage content">
+    <div>
+      <div class="head">Anything irreversible <em>waits for a human.</em></div>
+      <div class="cards">
+        <div class="card"><div class="icon">⤴︎</div><div class="name">Open a pull request</div><div class="why">Changes someone else’s repository.</div>
+          <div class="status"><span class="st wait"><span class="dot"></span>Held by TrueForge</span><span class="st ok"><span class="dot"></span>Approved by a human</span></div></div>
+        <div class="card"><div class="icon">✉︎</div><div class="name">Reply to the customer</div><div class="why">Can’t be unsent.</div>
+          <div class="status"><span class="st wait"><span class="dot"></span>Held by TrueForge</span><span class="st ok"><span class="dot"></span>Approved by a human</span></div></div>
+      </div>
+    </div>
+  </div>
+  <script src="../node_modules/gsap/dist/gsap.min.js"></script>
+  <script src="lib.js"></script>
+  <script>
+    window.build = D => {
+      const tl = gsap.timeline({ paused: true });
+      drift(tl, D);
+      tl.fromTo('.head', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out' }, 0.2);
+      tl.fromTo('.card', { opacity: 0, y: 60, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.9, stagger: 0.25, ease: 'power3.out' }, 0.9);
+      tl.to('.wait', { opacity: 0.55, duration: 0.5, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 1.8);
+      const flip = Math.max(3.4, D - 2.2);
+      tl.to('.card:nth-child(1) .wait', { opacity: 0, duration: 0.3 }, flip);
+      tl.to('.card:nth-child(1) .ok', { opacity: 1, duration: 0.4 }, flip + 0.1);
+      tl.to('.card:nth-child(2) .wait', { opacity: 0, duration: 0.3 }, flip + 0.6);
+      tl.to('.card:nth-child(2) .ok', { opacity: 1, duration: 0.4 }, flip + 0.7);
+      outro(tl, D, 0.5);
+      return tl;
+    };
+  </script>
+</body></html>

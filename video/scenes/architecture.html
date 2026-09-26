@@ -1,0 +1,77 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css">
+<style>
+  svg { position: absolute; inset: 0; z-index: 0; }
+  .core, .node, .term, .title { z-index: 1; }
+  .core {
+    position: absolute; left: 760px; top: 400px; width: 400px; height: 220px; border-radius: 32px;
+    display: grid; place-items: center; opacity: 0;
+    background: radial-gradient(120% 120% at 50% 0%, #3a2f8f, #16161f 70%);
+    border: 1px solid rgba(160,150,255,0.45); box-shadow: 0 0 80px rgba(124,108,255,0.35);
+  }
+  .core img { width: 300px; }
+  .core .sub { font-size: 20px; color: #c3bdff; margin-top: -40px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; }
+  .node {
+    position: absolute; padding: 18px 26px; border-radius: 18px; font-size: 27px; font-weight: 600; opacity: 0;
+    background: #15161e; border: 1px solid rgba(255,255,255,0.14); white-space: nowrap;
+  }
+  .node small { display: block; font-size: 18px; color: #8f8f9a; font-weight: 500; margin-top: 4px; }
+  .cap { color: #e9e7ff; }
+  .mcp { border-color: rgba(45,212,191,0.45); background: #0f1d1f; }
+  .title { position: absolute; top: 70px; width: 100%; text-align: center; font-size: 60px; font-weight: 700; letter-spacing: -0.03em; opacity: 0; }
+  .term {
+    position: absolute; left: 510px; bottom: 50px; width: 900px; padding: 18px 26px; white-space: nowrap; border-radius: 14px; opacity: 0;
+    background: #0d0f14; border: 1px solid rgba(255,255,255,0.1); font-size: 22px; color: #cfd3dc;
+  }
+  .term .ok { color: #4ade80; }
+  .term .p { color: #7c6cff; }
+</style></head>
+<body>
+  <div class="glow violet" style="width:1000px;height:900px;left:460px;top:100px;opacity:.3"></div>
+  <div class="title">Built entirely on <span class="gradient-text">TrueForge</span></div>
+  <svg width="1920" height="1080" id="wires"></svg>
+  <div class="core"><div><img src="../assets/trueforge-white.svg" alt="TrueForge"><div class="sub" style="text-align:center;margin-top:18px">agent loop</div></div></div>
+  <div id="nodes"></div>
+  <div class="term mono"><span class="p">$</span> ./scripts/start.sh <span class="ok" id="ok">&nbsp;&nbsp;✓ Ready: open http://localhost:8790</span></div>
+  <script src="../node_modules/gsap/dist/gsap.min.js"></script>
+  <script src="lib.js"></script>
+  <script>
+    const C = { x: 960, y: 510 };
+    const N = [
+      ['cap', 'Sandbox', 'runs generated code', 250, 250],
+      ['cap', 'Skills', 'the procedure, from git', 250, 470],
+      ['cap', 'Tool approvals', 'the two gates', 250, 690],
+      ['cap', 'Generative UI', 'plan · triage · verdict', 1380, 250],
+      ['cap', 'Schedules', 'hourly triage sweep', 1380, 470],
+      ['cap', 'Sessions', 'full audit trail', 1380, 690],
+      ['mcp', 'Linear', 'MCP connector', 560, 170],
+      ['mcp', 'GitHub', 'MCP connector', 1180, 170],
+      ['mcp', 'Browser Lab', 'our MCP server', 870, 790],
+    ];
+    const nodes = document.getElementById('nodes');
+    const svg = document.getElementById('wires');
+    N.forEach(([k, name, sub, x, y], i) => {
+      nodes.insertAdjacentHTML('beforeend', `<div class="node ${k}" style="left:${x}px;top:${y}px">${name}<small>${sub}</small></div>`);
+      const nx = x + 140, ny = y + 45;
+      const color = k === 'mcp' ? 'rgba(45,212,191,0.55)' : 'rgba(160,150,255,0.45)';
+      svg.insertAdjacentHTML('beforeend', `<path class="wire" d="M${C.x},${C.y} C${(C.x + nx) / 2},${C.y} ${(C.x + nx) / 2},${ny} ${nx},${ny}" stroke="${color}" stroke-width="2" fill="none"/>`);
+    });
+    window.build = D => {
+      const tl = gsap.timeline({ paused: true });
+      drift(tl, D);
+      document.querySelectorAll('.wire').forEach(p => { const L = p.getTotalLength(); p.style.strokeDasharray = L; p.style.strokeDashoffset = L; });
+      tl.fromTo('.title', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, 0.1);
+      tl.fromTo('.core', { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.9, ease: 'back.out(1.6)' }, 0.4);
+      const step = Math.min(0.9, (D * 0.62) / N.length);
+      document.querySelectorAll('.wire').forEach((p, i) => {
+        tl.to(p, { strokeDashoffset: 0, duration: 0.7, ease: 'power2.out' }, 1.2 + i * step);
+        tl.fromTo(document.querySelectorAll('.node')[i], { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'power3.out' }, 1.5 + i * step);
+      });
+      tl.to('.core', { boxShadow: '0 0 140px rgba(124,108,255,0.6)', duration: 1.2, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 2);
+      tl.fromTo('.term', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, D * 0.78);
+      tl.fromTo('#ok', { opacity: 0 }, { opacity: 1, duration: 0.4 }, D * 0.78 + 0.9);
+      outro(tl, D, 0.6, '.title, .core, .node, .term, svg');
+      return tl;
+    };
+  </script>
+</body></html>

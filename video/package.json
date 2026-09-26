@@ -1,0 +1,9 @@
+{
+  "name": "show-dont-tell-video",
+  "private": true,
+  "type": "module",
+  "description": "Launch video pipeline: voiceover, footage capture, motion graphics, assembly",
+  "devDependencies": {
+    "gsap": "^3.13.0"
+  }
+}

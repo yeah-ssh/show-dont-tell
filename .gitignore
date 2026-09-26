@@ -5,3 +5,6 @@ demo-shop/
 *.log
 .DS_Store
 .logs/
+video/out/
+video/raw/
+video/node_modules/

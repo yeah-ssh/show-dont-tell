@@ -1,0 +1,40 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css">
+<style>
+  .title { font-size: 170px; font-weight: 800; letter-spacing: -0.05em; text-align: center; opacity: 0; }
+  .tag { margin-top: 30px; display: flex; justify-content: center; gap: 36px; font-size: 52px; font-weight: 600; letter-spacing: -0.02em; }
+  .tag span { opacity: 0; }
+  .tag .in { color: #a7a7b2; }
+  .tag .out { color: #fff; }
+  .built { margin-top: 70px; display: flex; justify-content: center; align-items: center; gap: 22px; opacity: 0; }
+  .built .label { font-size: 30px; color: #a9a9b3; font-weight: 500; }
+  .built img { height: 46px; }
+  .url { margin-top: 36px; text-align: center; font-size: 28px; color: #8c8c97; opacity: 0; }
+</style></head>
+<body>
+  <div class="glow violet" style="width:1100px;height:900px;left:410px;top:90px;opacity:.45"></div>
+  <div class="glow teal" style="width:700px;height:700px;left:1100px;top:420px;opacity:.28"></div>
+  <div class="stage content">
+    <div>
+      <div class="title gradient-text">Show, Don’t Tell.</div>
+      <div class="tag"><span class="in">Tickets in.</span><span class="out">Proof out.</span></div>
+      <div class="built"><span class="label">Built on</span><img src="../assets/trueforge-white.svg" alt="TrueForge"></div>
+      <div class="url mono">github.com/yeah-ssh/show-dont-tell</div>
+    </div>
+  </div>
+  <script src="../node_modules/gsap/dist/gsap.min.js"></script>
+  <script src="lib.js"></script>
+  <script>
+    window.build = D => {
+      const tl = gsap.timeline({ paused: true });
+      drift(tl, D);
+      tl.fromTo('.title', { opacity: 0, scale: 1.06, filter: 'blur(14px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 1.3, ease: 'expo.out' }, 0.2);
+      tl.fromTo('.tag span', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.6, ease: 'power3.out' }, 1.3);
+      tl.fromTo('.built', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, 2.8);
+      tl.fromTo('.url', { opacity: 0 }, { opacity: 1, duration: 0.8 }, 3.4);
+      tl.to('.content', { scale: 1.025, duration: D, ease: 'none' }, 0);
+      tl.to('body', { opacity: 0, duration: 1.2, ease: 'power2.in' }, D - 1.2);
+      return tl;
+    };
+  </script>
+</body></html>

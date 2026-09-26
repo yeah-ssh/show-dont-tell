@@ -1,0 +1,69 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><link rel="stylesheet" href="devices.css">
+<style>
+  #before { left: 230px; top: 300px; width: 290px; height: 610px; }
+  #after { left: 1400px; top: 300px; width: 290px; height: 610px; }
+  #bLabel { left: 205px; top: 238px; }
+  #aLabel { left: 1318px; top: 238px; }
+  #diff { left: 640px; top: 410px; width: 640px; }
+  #diff pre { font-size: 23px; }
+  #arrow { position: absolute; left: 1290px; top: 560px; font-size: 64px; color: #7cf0a4; }
+  #checks { position: absolute; left: 0; right: 0; top: 160px; display: flex; justify-content: center; gap: 22px; }
+  #checks .badge { position: static; font-size: 24px; padding: 10px 18px; }
+</style></head>
+<body>
+  <div class="glow violet" style="width:1000px;height:800px;left:450px;top:200px;opacity:.25"></div>
+  <div class="glow teal" style="width:800px;height:700px;left:1250px;top:300px;opacity:.2"></div>
+  <div class="content">
+    <div class="step" id="title"><span class="num">2</span>It fixes it, and proves the fix</div>
+    <div id="checks">
+      <span class="badge good" id="c1">✓ Same check · passes</span>
+      <span class="badge good" id="c2">✓ Vision model · 98% confident</span>
+      <span class="badge good" id="c3">✓ Laptop layout · unchanged</span>
+    </div>
+
+    <div class="badge bad" id="bLabel">BEFORE · customer’s phone</div>
+    <div class="phone" id="before"><div class="notch"></div><div class="screen"><img src="../assets/shots/phone-before.png"></div></div>
+    <div class="callout bad" id="bMiss" style="left:540px;top:700px">⟵ Checkout missing</div>
+
+    <div class="code" id="diff">
+      <div class="head">The fix · styles.css · one CSS rule</div>
+      <pre><span class="ln">@media (max-width: 480px) {</span><span class="ln del">-   .header-actions,</span><span class="ln del">-   .checkout-btn {      <span style="color:#ff8e99">← hid checkout</span></span><span class="ln add">+   .header-actions {</span><span class="ln">      display: none;</span></pre>
+    </div>
+    <div id="arrow">➜</div>
+
+    <div class="badge good" id="aLabel">AFTER · same check, fresh copy</div>
+    <div class="phone" id="after"><div class="notch"></div><div class="screen"><img src="../assets/shots/phone-after.png">
+      <div class="ring good" id="aRing" style="left:20px;top:514px;width:228px;height:42px"></div></div></div>
+    <div class="callout good" id="aBack" style="left:1062px;top:820px">✓ Checkout is back ⟶</div>
+  </div>
+  <script src="../node_modules/gsap/dist/gsap.min.js"></script>
+  <script src="lib.js"></script>
+  <script>
+    window.build = D => {
+      const tl = gsap.timeline({ paused: true });
+      drift(tl, D);
+      const tFix = cue('fixes', 0.4);
+      const tSame = cue('exact', D * 0.25);
+      const tPass = cue('passes', D * 0.4);
+      const tVision = cue('vision', D * 0.5);
+      const tBA = cue('before', D * 0.72);
+      tl.fromTo('#title', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, 0.1);
+      tl.fromTo(['#before', '#bLabel'], { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.8, ease: 'power3.out' }, 0.3);
+      tl.fromTo('#bMiss', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5 }, 1.0);
+      tl.fromTo('#diff', { opacity: 0, y: 30, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: 'power3.out' }, tFix + 0.2);
+      tl.fromTo('#diff .del', { opacity: 1 }, { opacity: 0.45, duration: 0.5 }, tFix + 1.4);
+      tl.fromTo('#diff .add', { backgroundColor: 'rgba(34,197,94,0)' }, { backgroundColor: 'rgba(34,197,94,0.3)', duration: 0.5, yoyo: true, repeat: 1 }, tFix + 1.6);
+      tl.fromTo('#arrow', { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.5 }, tSame);
+      tl.fromTo(['#after', '#aLabel'], { opacity: 0, x: 50 }, { opacity: 1, x: 0, duration: 0.8, ease: 'power3.out' }, tSame + 0.3);
+      tl.fromTo('#aRing', { opacity: 0, scale: 1.2 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(2)' }, tPass);
+      tl.fromTo('#aBack', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5 }, tPass + 0.15);
+      tl.fromTo('#c1', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.45 }, tPass + 0.3);
+      tl.fromTo('#c2', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.45 }, tVision + 0.2);
+      tl.fromTo('#c3', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.45 }, tVision + 0.9);
+      tl.to(['#before', '#after'], { scale: 1.04, duration: 0.6, yoyo: true, repeat: 1, ease: 'sine.inOut' }, tBA);
+      outro(tl, D, 0.5);
+      return tl;
+    };
+  </script>
+</body></html>

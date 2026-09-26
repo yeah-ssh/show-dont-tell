@@ -60,6 +60,14 @@ captions.forEach((c, i) => {
   c.png = join(WORK, `cap-${String(i).padStart(3, '0')}.png`);
   stillJobs.push({ scene: 'caption', out: c.png, params: { text: c.text }, transparent: true });
 });
+// On-screen labels for footage scenes (what the viewer is looking at).
+const notes = edit.notes ?? {};
+Object.entries(notes).forEach(([visual, list]) =>
+  list.forEach((n, i) => {
+    n.png = join(WORK, `note-${visual}-${i}.png`);
+    stillJobs.push({ scene: 'note', out: n.png, params: { text: n.text, tone: n.tone }, transparent: true });
+  }),
+);
 await renderStills(stillJobs);
 console.log(`✓ ${stillJobs.length} stills (frames, mask, ${captions.length} captions)`);
 
@@ -81,6 +89,7 @@ function segment(seg, dur, out) {
 
 function footageClip(s, out) {
   const segs = edit[s.visual.slice('footage:'.length)];
+  if (!Array.isArray(segs)) throw new Error(`edit.json: ${s.visual} must be a list of segments`);
   if (!segs) throw new Error(`edit.json has no entry for ${s.visual}`);
   const weights = segs.reduce((a, g) => a + (g.weight ?? 1), 0);
   const parts = segs.map((g, i) => {
@@ -119,13 +128,31 @@ function footageClip(s, out) {
       `[f][m]alphamerge[fm];[0:v][fm]overlay=120:90:shortest=1,fps=${FPS},format=yuv420p[v]`,
     '-map', '[v]', '-t', D, '-c:v', 'libx264', '-crf', '16', '-preset', 'fast', out,
   ], `frame ${s.id}`);
+  const list = notes[s.visual.slice('footage:'.length)] ?? [];
+  if (list.length) {
+    const labelled = out.replace(/\.mp4$/, '-notes.mp4');
+    let chain = '';
+    let last = '[0:v]';
+    list.forEach((n, i) => {
+      const lbl = i === list.length - 1 ? '[v]' : `[n${i}]`;
+      const a = n.at;
+      const b = n.at + n.dur;
+      // fade each label in and out over 0.25 s
+      chain += `[${i + 1}:v]format=rgba,fade=t=in:st=${a}:d=0.25:alpha=1,fade=t=out:st=${(b - 0.25).toFixed(2)}:d=0.25:alpha=1[l${i}];`;
+      chain += `${last}[l${i}]overlay=0:0:enable='between(t,${a},${b})'${lbl};`;
+      last = lbl;
+    });
+    ff(['-i', out, ...list.flatMap(n => ['-loop', '1', '-t', D, '-i', n.png]), '-filter_complex', chain.slice(0, -1), '-map', '[v]', '-t', D, '-c:v', 'libx264', '-crf', '16', '-preset', 'fast', '-pix_fmt', 'yuv420p', labelled], `notes ${s.id}`);
+    execFileSync('mv', [labelled, out]);
+  }
 }
 
 const clips = [];
 for (const s of scenes) {
   const out = join(WORK, `${s.id}.mp4`);
   if (s.visual.startsWith('scene:')) {
-    execFileSync('node', [join(here, 'render-scene.mjs'), s.visual.slice(6), String(s.duration), out], { stdio: 'inherit' });
+    const words = s.vo.words.map(w => ({ w: w.w, start: +(w.start + LEAD).toFixed(3) }));
+    execFileSync('node', [join(here, 'render-scene.mjs'), s.visual.slice(6), String(s.duration), out, JSON.stringify({ words })], { stdio: 'inherit' });
   } else {
     footageClip(s, out);
     console.log(`✓ ${s.id} (footage, ${s.duration}s)`);

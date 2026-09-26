@@ -52,13 +52,6 @@
       "weight": 0.6
     }
   ],
-  "evidence": [
-    {
-      "src": "evidence.mp4",
-      "from": 0,
-      "speed": 1
-    }
-  ],
   "approve-and-pr": [
     {
       "src": "live2.mp4",
@@ -155,5 +148,89 @@
         "h": 684
       }
     }
-  ]
+  ],
+  "notes": {
+    "linear-ticket": [
+      {
+        "text": "A real customer bug report, in Linear",
+        "at": 0.8,
+        "dur": 4.6
+      },
+      {
+        "text": "\u201con my phone\u201d \u00b7 but \u201cworks on my laptop\u201d",
+        "at": 5.8,
+        "dur": 5.2
+      }
+    ],
+    "trueforge-investigate": [
+      {
+        "text": "We ask the agent: \u201cResolve TRU-16\u201d",
+        "at": 0.6,
+        "dur": 3.8
+      },
+      {
+        "text": "It reads the ticket and makes a plan",
+        "at": 4.8,
+        "dur": 3.8
+      },
+      {
+        "text": "It reads the code in TrueForge\u2019s sandbox",
+        "at": 8.8,
+        "dur": 3.6
+      }
+    ],
+    "approve-and-pr": [
+      {
+        "text": "\u23f8 Paused: human approval required \u2192 Allow",
+        "tone": "warn",
+        "at": 0.3,
+        "dur": 3.7
+      },
+      {
+        "text": "The pull request on GitHub, with the video inside",
+        "tone": "good",
+        "at": 4.5,
+        "dur": 4.3
+      }
+    ],
+    "reply": [
+      {
+        "text": "\u23f8 Approve the reply to the customer",
+        "tone": "warn",
+        "at": 0.3,
+        "dur": 3.6
+      },
+      {
+        "text": "The reply in Linear, with the before/after video",
+        "tone": "good",
+        "at": 4.4,
+        "dur": 4.4
+      }
+    ],
+    "judgment": [
+      {
+        "text": "Can\u2019t reproduce \u2192 no fake fix, an honest reply",
+        "at": 0.5,
+        "dur": 5.9
+      },
+      {
+        "text": "Hidden instruction in a ticket \u2192 refused and flagged",
+        "tone": "warn",
+        "at": 7.0,
+        "dur": 5.9
+      }
+    ],
+    "schedule": [
+      {
+        "text": "Runs every hour, on its own",
+        "at": 0.5,
+        "dur": 4.9
+      },
+      {
+        "text": "Triage: it picks the oldest real bug",
+        "at": 6.2,
+        "dur": 6.4
+      }
+    ]
+  }
 }

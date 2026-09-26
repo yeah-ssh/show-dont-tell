@@ -1,0 +1,63 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css"><link rel="stylesheet" href="devices.css">
+<style>
+  #code { left: 360px; top: 300px; width: 1200px; }
+  #desk { left: 150px; top: 330px; width: 940px; }
+  #phone { left: 1300px; top: 300px; width: 290px; height: 610px; }
+  #deskBadge { left: 150px; top: 262px; }
+  #phoneBadge { left: 1250px; top: 232px; }
+  #stamp { left: 1262px; top: 400px; font-size: 54px; font-weight: 800; letter-spacing: .06em; color: #ff4d5e;
+           border: 6px solid #ff4d5e; border-radius: 16px; padding: 8px 26px; transform: rotate(-10deg); position: absolute; background: rgba(10,10,14,.75); }
+  #lab { left: 0; right: 0; top: 150px; }
+</style></head>
+<body>
+  <div class="glow violet" style="width:1000px;height:800px;left:-150px;top:200px;opacity:.25"></div>
+  <div class="glow rose" style="width:800px;height:700px;left:1200px;top:300px;opacity:.18"></div>
+  <div class="content">
+    <div class="step" id="title"><span class="num">1</span>It proves the bug first</div>
+    <div class="sub" id="lab">It writes a browser check of what the customer expects, and runs it in an isolated <b style="color:#e9e7ff">Browser Lab</b></div>
+
+    <div class="code" id="code">
+      <div class="head">run_repro · the check the agent wrote</div>
+      <pre><span class="ln"><span class="k">await</span> page.locator(<span class="s">'[data-add="tee"]'</span>).<span class="f">click</span>();   <span class="c">// add the Agent Tee</span></span><span class="ln"><span class="k">await</span> page.locator(<span class="s">'#cart'</span>).<span class="f">scrollIntoViewIfNeeded</span>();</span><span class="ln"><span class="k">await</span> <span class="f">expect</span>(page.locator(<span class="s">'#total'</span>)).<span class="f">toHaveText</span>(<span class="s">'₹900'</span>);</span><span class="ln hl" id="key"><span class="k">await</span> <span class="f">expect</span>(page.locator(<span class="s">'#checkout'</span>)).<span class="f">toBeVisible</span>(); <span class="c">// must be visible</span></span></pre>
+    </div>
+
+    <div class="badge good" id="deskBadge">✓ Laptop · checkout visible · passes</div>
+    <div class="browser" id="desk">
+      <div class="bar"><i></i><i></i><i></i><span class="url">demo-shop · 1280×720</span></div>
+      <div class="screen"><img src="../assets/shots/desktop-pass.png"><div class="ring good" id="deskRing" style="left:144px;top:408px;width:652px;height:46px"></div></div>
+    </div>
+
+    <div class="badge bad" id="phoneBadge">✗ Phone · checkout missing · fails</div>
+    <div class="phone" id="phone"><div class="notch"></div><div class="screen"><img src="../assets/shots/phone-before.png"></div></div>
+    <div class="callout bad" id="miss" style="left:1262px;top:772px">▲ Checkout button is missing</div>
+    <div id="stamp">REPRODUCED</div>
+  </div>
+  <script src="../node_modules/gsap/dist/gsap.min.js"></script>
+  <script src="lib.js"></script>
+  <script>
+    window.build = D => {
+      const tl = gsap.timeline({ paused: true });
+      drift(tl, D);
+      const tRun = cue('runs', D * 0.42);
+      const tDesk = cue('desktop', D * 0.58);
+      const tPhone = cue('phone', D * 0.7);
+      const tRepro = cue('reproduced', D * 0.8);
+      tl.fromTo('#title', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, 0.1);
+      tl.fromTo('#lab', { opacity: 0 }, { opacity: 1, duration: 0.7 }, 0.5);
+      tl.fromTo('#code', { opacity: 0, y: 40, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: 'power3.out' }, 0.7);
+      tl.fromTo('#key', { backgroundColor: 'rgba(124,108,255,0)' }, { backgroundColor: 'rgba(124,108,255,0.28)', duration: 0.5, repeat: 3, yoyo: true }, 1.8);
+      // The check "runs": the code steps aside, results appear.
+      tl.to('#code', { opacity: 0, y: -60, scale: 0.9, duration: 0.6, ease: 'power2.in' }, tRun + 0.6);
+      tl.fromTo('#desk', { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.8, ease: 'power3.out' }, tRun + 1.0);
+      tl.fromTo('#phone', { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: 0.8, ease: 'power3.out' }, tRun + 1.2);
+      tl.fromTo('#deskBadge', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5 }, tDesk);
+      tl.fromTo('#deskRing', { opacity: 0, scale: 1.15 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(2)' }, tDesk);
+      tl.fromTo('#phoneBadge', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5 }, tPhone);
+      tl.fromTo('#miss', { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.5, ease: 'power3.out' }, tPhone + 0.2);
+      tl.fromTo('#stamp', { opacity: 0, scale: 2.2 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(1.8)' }, tRepro);
+      outro(tl, D, 0.5);
+      return tl;
+    };
+  </script>
+</body></html>

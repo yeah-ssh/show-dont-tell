@@ -36,15 +36,13 @@
     },
     {
       "id": "06-reproduce",
-      "visual": "footage:trueforge-reproduce",
-      "chip": "Browser Lab",
+      "visual": "scene:proof",
       "narration": "Then it proves it. It writes a browser check for what the customer expects, and runs it in an isolated browser lab. Desktop passes. On a phone, it fails. Reproduced.",
       "pad_after": 2.4
     },
     {
       "id": "07-evidence",
-      "visual": "footage:evidence",
-      "chip": "Browser Lab",
+      "visual": "scene:fix",
       "narration": "It fixes the code, and runs the exact same check on a fresh copy of the app. Now it passes. A vision model confirms it independently. Before, and after. Proof, not a promise.",
       "pad_after": 2.6
     },

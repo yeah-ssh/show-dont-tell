@@ -14,6 +14,14 @@ window.drift = (tl, D) => {
   });
 };
 
+// Time (s) when the narration says `word` (nth occurrence), from the voiceover's word timings
+// that assemble.mjs passes in params.words. Falls back to `fallback` when rendering standalone.
+window.cue = (word, fallback, nth = 1) => {
+  const norm = w => w.toLowerCase().replace(/[^a-z0-9']/g, '');
+  const hits = (params.words || []).filter(w => norm(w.w).startsWith(norm(word)));
+  return hits[nth - 1]?.start ?? fallback;
+};
+
 // Fade everything out over the last `t` seconds (scenes end clean for crossfades).
 window.outro = (tl, D, t = 0.6, sel = '.content') => {
   tl.to(sel, { opacity: 0, y: -20, duration: t, ease: 'power2.in' }, Math.max(0, D - t));

@@ -1,6 +1,10 @@
 import { execFileSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
+
+const envFile = resolve(import.meta.dirname, '..', '..', '.env');
+if (existsSync(envFile)) process.loadEnvFile(envFile);
 
 function env(name: string, fallback = ''): string {
   return process.env[name]?.trim() || fallback;
@@ -46,9 +50,17 @@ export const config = {
   githubToken: ghToken(),
 
   // Vision double-check. Point OPENAI_BASE_URL at the TrueFoundry AI Gateway to route through it.
-  openaiApiKey: env('VISION_API_KEY', env('OPENAI_API_KEY')),
-  openaiBaseUrl: env('VISION_BASE_URL', env('OPENAI_BASE_URL', 'https://api.openai.com/v1')),
-  visionModel: env('VISION_MODEL', 'gpt-5-mini'),
+  ...(env('TFY_GATEWAY_BASE_URL') && env('TFY_API_KEY')
+    ? {
+        openaiApiKey: env('TFY_API_KEY'),
+        openaiBaseUrl: env('TFY_GATEWAY_BASE_URL'),
+        visionModel: env('TFY_VISION_MODEL', 'openai-main/gpt-5.4-mini'),
+      }
+    : {
+        openaiApiKey: env('OPENAI_API_KEY'),
+        openaiBaseUrl: env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
+        visionModel: env('VISION_MODEL', 'gpt-5.4-mini'),
+      }),
 
   // Customer replies (the irreversible action).
   resendApiKey: env('RESEND_API_KEY'),

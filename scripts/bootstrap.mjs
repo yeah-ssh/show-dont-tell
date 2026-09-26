@@ -20,7 +20,9 @@ const TARGET_REPO = env('TARGET_REPO', 'https://github.com/yeah-ssh/demo-shop');
 const SKILL_REPO = env('SKILL_REPO', 'https://github.com/yeah-ssh/show-dont-tell');
 const SKILL_REF = env('SKILL_REF', 'main');
 
-const LINEAR_TOOLS = ['get_issue', 'list_comments', 'save_comment', 'save_issue', 'list_issue_statuses'];
+const LINEAR_TOOLS = ['get_issue', 'list_comments', 'save_comment', 'save_issue', 'list_issue_statuses', 'list_issues', 'list_issue_labels'];
+const TRIAGE_LABEL = 'agent-handled';
+const SCHEDULE_NAME = 'bug-triage-sweep';
 const GITHUB_TOOLS = ['create_branch', 'push_files', 'create_pull_request', 'get_file_contents'];
 const LAB_TOOLS = ['run_repro', 'compose_evidence', 'verify_screens', 'send_customer_reply'];
 
@@ -225,6 +227,53 @@ async function configureAgent(model, mcpServers) {
   }
 }
 
+async function linear(query, variables) {
+  const res = await fetch('https://api.linear.app/graphql', {
+    method: 'POST',
+    headers: { Authorization: env('LINEAR_API_KEY'), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, variables }),
+  });
+  const json = await res.json();
+  if (json.errors) throw new Error(JSON.stringify(json.errors).slice(0, 300));
+  return json.data;
+}
+
+async function configureSchedule() {
+  console.log('\n5. Auto-triage schedule');
+  const teamKey = env('LINEAR_TEAM_KEY');
+  if (!teamKey || !env('LINEAR_API_KEY')) {
+    warn('skipped: set LINEAR_API_KEY and LINEAR_TEAM_KEY to enable the triage sweep');
+    return;
+  }
+  // The sweep claims tickets with this label so later runs skip them.
+  const { teams } = await linear(`query($key: String!) { teams(filter: { key: { eq: $key } }) { nodes { id labels(filter: { name: { eq: "${TRIAGE_LABEL}" } }) { nodes { id } } } } }`, { key: teamKey });
+  const team = teams.nodes[0];
+  if (!team) die(`No Linear team with key ${teamKey}`);
+  if (!team.labels.nodes.length) {
+    await linear(`mutation($input: IssueLabelCreateInput!) { issueLabelCreate(input: $input) { success } }`, {
+      input: { teamId: team.id, name: TRIAGE_LABEL, color: '#1b998b', description: 'Picked up by the Show-Don\'t-Tell agent' },
+    });
+    ok(`created Linear label "${TRIAGE_LABEL}"`);
+  } else {
+    ok(`Linear label "${TRIAGE_LABEL}" exists`);
+  }
+
+  const manifest = {
+    task: `Run a triage sweep of Linear team ${teamKey}: pick the oldest unhandled UI bug ticket and resolve it, following "Triage sweep mode" in the ui-bug-repro skill.`,
+    cron: env('TRIAGE_CRON', '0 * * * *'),
+    timezone: env('TRIAGE_TIMEZONE', 'Asia/Kolkata'),
+    status: env('TRIAGE_SCHEDULE', 'active') === 'paused' ? 'paused' : 'active',
+  };
+  const existing = (await api('GET', '/api/v1/schedules')).data?.find(s => s.name === SCHEDULE_NAME);
+  if (existing) {
+    await api('PUT', `/api/v1/schedules/${existing.id}`, { name: SCHEDULE_NAME, manifest });
+    ok(`updated schedule "${SCHEDULE_NAME}" (${manifest.cron}, ${manifest.timezone}, ${manifest.status})`);
+  } else {
+    await api('POST', '/api/v1/schedules', { agent_name: AGENT_NAME, name: SCHEDULE_NAME, manifest });
+    ok(`created schedule "${SCHEDULE_NAME}" (${manifest.cron}, ${manifest.timezone}, ${manifest.status})`);
+  }
+}
+
 console.log(`Configuring TrueForge at ${TF}`);
 await waitForTrueForge();
 const caps = await api('GET', '/api/v1/capabilities');
@@ -233,4 +282,5 @@ const model = await configureModel();
 const servers = await configureMcp();
 await configureSkill();
 await configureAgent(model, servers);
+await configureSchedule();
 console.log(`\nDone. Open ${TF} and pick the "${AGENT_NAME}" agent.`);

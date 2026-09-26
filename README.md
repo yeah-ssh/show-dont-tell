@@ -172,9 +172,6 @@ scripts/lab-smoke.mjs          lab end-to-end smoke test
 - Browsers: Chromium and Firefox. WebKit/Safari-only bugs end up on the honest "could not reproduce" path, by design.
 - Host mode isolates the agent's script with Node permissions and request blocking; Docker mode is the stronger boundary.
 - Evidence is published to a public GitHub repo so PRs, Linear and email can show it. Don't point this at private customer data without changing `EVIDENCE_STORE`.
-
-## AI tools used
-Built with **Claude Code** (Claude Opus 5.5) as a pair programmer: research into TrueForge internals, scaffolding and code review. Architecture decisions, demo design and testing were done by the team. The agent itself runs on OpenAI models via TrueForge.
-
+  
 ## License
 MIT

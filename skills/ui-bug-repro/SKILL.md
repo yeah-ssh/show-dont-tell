@@ -63,6 +63,13 @@ Rules:
 5. `compose_evidence` with panels `[{BEFORE run, "BEFORE: bug", "bad"}, {AFTER run, "AFTER: fixed", "good"}]`.
 6. `verify_screens` with a plain-words expectation and both run ids. Report its confidence honestly, even if it's low.
 
+### Browsers the lab doesn't have (Safari, old versions)
+The lab runs Chromium and Firefox. If the ticket names another browser **and** you can find a specific, documented incompatibility in the code (e.g. regex lookbehind, unsupported before Safari 16.4), you may reproduce it with a **compatibility emulation**. In the check, make the page fail exactly the way that browser would, e.g. intercept the script with `page.route` and raise the same SyntaxError. Rules:
+- Label every such run `… (emulated)`, and in the PR and the reply say plainly: *"emulated in Chromium; not tested on a real Safari 14"*.
+- Name the evidence for the incompatibility (feature + first supported version).
+- In the customer reply, ask them to confirm the fix on their device once it ships.
+If there's no specific incompatibility in the code, don't invent one: go to 4b.
+
 ## Phase 4b: Not reproduced → be honest
 If all strategies returned `passed`:
 1. Do **not** patch anything, and do not open a PR.

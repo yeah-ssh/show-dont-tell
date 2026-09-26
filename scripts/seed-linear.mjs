@@ -49,6 +49,12 @@ Reported by: Arjun Rao <${CUSTOMER}>`,
 
 Reported by: Meera Iyer <${CUSTOMER}>`,
   },
+  {
+    title: 'Cart total shows dollars instead of rupees',
+    description: `On my work laptop the cart total says $900 instead of ₹900. Pretty confusing, am I going to be charged in dollars? It's Chrome on Windows.
+
+Reported by: Kabir Mehta <${CUSTOMER}>`,
+  },
 ];
 
 if (process.argv.includes('--with-injection')) {

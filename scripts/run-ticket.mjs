@@ -29,12 +29,21 @@ const short = (s, n = 160) => {
   return one.length > n ? `${one.slice(0, n)}…` : one;
 };
 
-const { data: session } = await client.sessions.create({ agent: { name: 'ticket-resolver' }, metadata: { linear_issue: issue } });
-await client.sessions.update(session.id, { title: `${issue} (cli)` });
+// --session=<id> resumes an existing session (e.g. after a tool timeout) instead of starting fresh.
+const resumeId = flag('session')[0];
+const session = resumeId
+  ? { id: resumeId }
+  : (await client.sessions.create({ agent: { name: 'ticket-resolver' }, metadata: { linear_issue: issue } })).data;
+if (!resumeId) await client.sessions.update(session.id, { title: `${issue} (cli)` });
 console.log(`session ${session.id}\n${TF}/sessions/${session.id}\n`);
 
 const toolNames = new Map();
-let input = [{ type: 'user.message', content: `Resolve Linear issue ${issue}.` }];
+let input = [{
+  type: 'user.message',
+  content: resumeId
+    ? 'The previous turn was interrupted by a tool error. Check what already happened (e.g. whether the PR exists), redo only what is missing, and continue the procedure to the Verdict card.'
+    : `Resolve Linear issue ${issue}.`,
+}];
 
 // Print full events from the REST API (the stream carries partial deltas).
 const seen = new Set();

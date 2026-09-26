@@ -113,7 +113,6 @@ function buildServer(): McpServer {
         expectation: z.string().describe('The correct behaviour, in plain words, e.g. "The orange Checkout button is visible below the totals."'),
         before_run_id: z.string().optional(),
         after_run_id: z.string().optional(),
-        ticket: z.string().optional().describe('Linear issue id, e.g. "TRU-5" (used for cost attribution in the AI gateway).'),
       },
       annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: true },
     },
@@ -121,7 +120,7 @@ function buildServer(): McpServer {
       try {
         const before = args.before_run_id ? await loadRun(args.before_run_id) : undefined;
         const after = args.after_run_id ? await loadRun(args.after_run_id) : undefined;
-        return reply('verify_screens', args, await verifyScreens({ expectation: args.expectation, before, after, ticket: args.ticket }));
+        return reply('verify_screens', args, await verifyScreens({ expectation: args.expectation, before, after }));
       } catch (err) {
         return fail('verify_screens', args, err);
       }
@@ -160,7 +159,7 @@ function buildServer(): McpServer {
 const app = express();
 app.use(express.json({ limit: '5mb' }));
 app.get('/healthz', (_req, res) => {
-  res.json({ ok: true, runner: config.runner, evidence: config.evidenceStore, target: config.targetRepo, model_route: config.viaGateway ? 'truefoundry-gateway' : 'openai' });
+  res.json({ ok: true, runner: config.runner, evidence: config.evidenceStore, target: config.targetRepo });
 });
 app.use('/evidence', express.static(config.dataDir));
 

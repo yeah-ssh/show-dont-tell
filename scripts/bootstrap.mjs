@@ -68,44 +68,11 @@ async function configureModel() {
   console.log('\n1. Model provider');
   const catalog = await api('GET', '/api/v1/catalogs/model-providers');
   const openaiCatalog = catalog.data.find(p => p.type === 'openai')?.models ?? [];
-  // Limits for models that aren't in TrueForge's OpenAI catalog (e.g. gateway-routed ones).
-  const KNOWN_LIMITS = {
-    'gpt-4o': { context_length: 128000, max_output_tokens: 16384 },
-    'gpt-4o-mini': { context_length: 128000, max_output_tokens: 16384 },
-    'gpt-4.1-mini': { context_length: 1047576, max_output_tokens: 32768 },
-  };
-  const props = modelId => {
-    const base = modelId.split('/').pop();
-    const found = openaiCatalog.find(m => m.model_id === modelId || m.model_id === base)?.properties ??
-      KNOWN_LIMITS[base] ?? { context_length: 128000, max_output_tokens: 16384 };
-    return {
-      ...found,
-      ...(env('AGENT_CONTEXT_LENGTH') ? { context_length: Number(env('AGENT_CONTEXT_LENGTH')) } : {}),
-      ...(env('AGENT_MAX_OUTPUT_TOKENS') ? { max_output_tokens: Number(env('AGENT_MAX_OUTPUT_TOKENS')) } : {}),
-    };
-  };
-  const hyphen = s => s.split('/').pop().replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+  const props = modelId =>
+    openaiCatalog.find(m => m.model_id === modelId)?.properties ?? { context_length: 400000, max_output_tokens: 128000 };
+  const hyphen = s => s.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
 
-  // The agent goes through the gateway only when TFY_AGENT_MODEL is set. With just the gateway
-  // URL + key, browser-lab's vision check uses the gateway and the agent talks to OpenAI directly.
-  if (env('TFY_GATEWAY_BASE_URL') && env('TFY_API_KEY') && env('TFY_AGENT_MODEL')) {
-    const modelId = env('TFY_AGENT_MODEL');
-    const name = hyphen(modelId);
-    await api('PUT', '/api/v1/settings/model-providers', {
-      manifest: {
-        type: 'custom',
-        name: 'tfy-gateway',
-        base_url: env('TFY_GATEWAY_BASE_URL'),
-        auth: { api_key: env('TFY_API_KEY') },
-        models: [{ model_id: modelId, name, properties: props(modelId) }],
-      },
-    });
-    ok(`TrueFoundry AI Gateway → ${modelId}`);
-    return { name: `tfy-gateway/${name}`, reasoning: Boolean(props(modelId).reasoning_efforts) };
-  }
-
-  if (env('TFY_GATEWAY_BASE_URL') && env('TFY_API_KEY')) ok('vision check routed through the TrueFoundry AI Gateway (agent direct: TFY_AGENT_MODEL is empty)');
-  const key = env('OPENAI_API_KEY') || die('Set OPENAI_API_KEY (or TFY_AGENT_MODEL with the gateway variables) in .env');
+  const key = env('OPENAI_API_KEY') || die('Set OPENAI_API_KEY in .env');
   const modelId = env('AGENT_MODEL', 'gpt-5.6-sol');
   const name = hyphen(modelId);
   await api('PUT', '/api/v1/settings/model-providers', {
@@ -139,46 +106,30 @@ async function configureMcp() {
   console.log('\n2. MCP connectors');
   const servers = [];
 
-  if (env('TFY_MCP_URL')) {
-    const available = await putMcp({
-      type: 'remote',
-      name: 'ticket-tools',
-      url: env('TFY_MCP_URL'),
-      description: 'TrueFoundry MCP Gateway (Virtual MCP): curated Linear + GitHub tools for resolving bug tickets.',
-      auth: { type: 'header', headers: { Authorization: `Bearer ${env('TFY_API_KEY')}` } },
-    });
-    servers.push({
-      name: 'ticket-tools',
-      enable_tools: pick([...LINEAR_TOOLS, ...GITHUB_TOOLS], available, 'ticket-tools'),
-      preload: true,
-      require_approval_for_tools: ['create_pull_request'],
-    });
-  } else {
-    const linearKey = env('LINEAR_API_KEY') || die('Set LINEAR_API_KEY in .env (or TFY_MCP_URL)');
-    const linear = await putMcp({
-      type: 'remote',
-      name: 'linear',
-      url: 'https://mcp.linear.app/mcp',
-      description: 'Linear: read bug tickets, comment, update status.',
-      auth: { type: 'header', headers: { Authorization: `Bearer ${linearKey}` } },
-    });
-    servers.push({ name: 'linear', enable_tools: pick(LINEAR_TOOLS, linear, 'linear'), preload: true, require_approval_for_tools: [] });
+  const linearKey = env('LINEAR_API_KEY') || die('Set LINEAR_API_KEY in .env');
+  const linear = await putMcp({
+    type: 'remote',
+    name: 'linear',
+    url: 'https://mcp.linear.app/mcp',
+    description: 'Linear: read bug tickets, comment, update status.',
+    auth: { type: 'header', headers: { Authorization: `Bearer ${linearKey}` } },
+  });
+  servers.push({ name: 'linear', enable_tools: pick(LINEAR_TOOLS, linear, 'linear'), preload: true, require_approval_for_tools: [] });
 
-    const gh = githubToken() || die('Set GITHUB_TOKEN in .env or run `gh auth login`');
-    const github = await putMcp({
-      type: 'remote',
-      name: 'github',
-      url: 'https://api.githubcopilot.com/mcp/',
-      description: 'GitHub: branches, files and pull requests for the target repo.',
-      auth: { type: 'header', headers: { Authorization: `Bearer ${gh}`, 'X-MCP-Toolsets': 'repos,pull_requests' } },
-    });
-    servers.push({
-      name: 'github',
-      enable_tools: pick(GITHUB_TOOLS, github, 'github'),
-      preload: true,
-      require_approval_for_tools: ['create_pull_request'],
-    });
-  }
+  const gh = githubToken() || die('Set GITHUB_TOKEN in .env or run `gh auth login`');
+  const github = await putMcp({
+    type: 'remote',
+    name: 'github',
+    url: 'https://api.githubcopilot.com/mcp/',
+    description: 'GitHub: branches, files and pull requests for the target repo.',
+    auth: { type: 'header', headers: { Authorization: `Bearer ${gh}`, 'X-MCP-Toolsets': 'repos,pull_requests' } },
+  });
+  servers.push({
+    name: 'github',
+    enable_tools: pick(GITHUB_TOOLS, github, 'github'),
+    preload: true,
+    require_approval_for_tools: ['create_pull_request'],
+  });
 
   const lab = await putMcp({
     type: 'remote',

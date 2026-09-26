@@ -13,23 +13,17 @@ export type VisionVerdict = {
 
 /**
  * A second, independent check on top of the DOM assertion: a vision model looks at the
- * final screenshots and judges whether the described bug is visible. Routed through
- * OPENAI_BASE_URL, so it can go via the TrueFoundry AI Gateway.
+ * final screenshots and judges whether the described bug is visible.
  */
 export async function verifyScreens(params: {
   expectation: string;
   before?: RunMeta;
   after?: RunMeta;
-  ticket?: string;
 }): Promise<VisionVerdict> {
   if (!config.openaiApiKey) {
     return { bug_visible_before: null, fixed_after: null, confidence: 0, notes: 'Vision check skipped: no API key configured.', model: 'none' };
   }
-  // Through the TrueFoundry AI Gateway, tag each call so spend shows per ticket in the gateway dashboard.
-  const defaultHeaders = config.viaGateway
-    ? { 'X-TFY-METADATA': JSON.stringify({ app: 'show-dont-tell', component: 'vision-check', ticket: params.ticket ?? 'unknown' }) }
-    : undefined;
-  const client = new OpenAI({ apiKey: config.openaiApiKey, baseURL: config.openaiBaseUrl, defaultHeaders });
+  const client = new OpenAI({ apiKey: config.openaiApiKey, baseURL: config.openaiBaseUrl });
   const content: OpenAI.Chat.Completions.ChatCompletionContentPart[] = [
     {
       type: 'text',

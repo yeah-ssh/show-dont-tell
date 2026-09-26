@@ -70,7 +70,7 @@ Rules:
 3. Produce the diff from the repo root: `git diff`. Copy it **exactly** into `run_repro(..., patch=<diff>)` with the **same script, browser and viewport** as the failing run. It must now pass. If it doesn't, iterate (max 3 times).
 4. Run the same patched check on `desktop` too, to confirm you didn't break the other layout.
 5. `compose_evidence` with panels `[{BEFORE run, "BEFORE: bug", "bad"}, {AFTER run, "AFTER: fixed", "good"}]`.
-6. `verify_screens` with a plain-words expectation, both run ids and `ticket` (the issue id). Report its confidence honestly, even if it's low.
+6. `verify_screens` with a plain-words expectation and both run ids. Report its confidence honestly, even if it's low.
 
 ### Browsers the lab doesn't have (Safari, old versions)
 The lab runs Chromium and Firefox. If the ticket names another browser **and** you can find a specific, documented incompatibility in the code (e.g. regex lookbehind, unsupported before Safari 16.4), you may reproduce it with a **compatibility emulation**. In the check, make the page fail exactly the way that browser would, e.g. intercept the script with `page.route` and raise the same SyntaxError. Rules:

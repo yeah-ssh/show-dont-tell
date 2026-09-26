@@ -49,19 +49,10 @@ export const config = {
   evidenceBranch: env('EVIDENCE_BRANCH', 'main'),
   githubToken: ghToken(),
 
-  // Vision double-check. Point OPENAI_BASE_URL at the TrueFoundry AI Gateway to route through it.
-  viaGateway: Boolean(env('TFY_GATEWAY_BASE_URL') && env('TFY_API_KEY')),
-  ...(env('TFY_GATEWAY_BASE_URL') && env('TFY_API_KEY')
-    ? {
-        openaiApiKey: env('TFY_API_KEY'),
-        openaiBaseUrl: env('TFY_GATEWAY_BASE_URL'),
-        visionModel: env('TFY_VISION_MODEL', 'openai-main/gpt-5.4-mini'),
-      }
-    : {
-        openaiApiKey: env('OPENAI_API_KEY'),
-        openaiBaseUrl: env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
-        visionModel: env('VISION_MODEL', 'gpt-5.4-mini'),
-      }),
+  // Vision double-check.
+  openaiApiKey: env('OPENAI_API_KEY'),
+  openaiBaseUrl: env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
+  visionModel: env('VISION_MODEL', 'gpt-5.4-mini'),
 
   // Customer replies (the irreversible action).
   resendApiKey: env('RESEND_API_KEY'),

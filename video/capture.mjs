@@ -213,7 +213,7 @@ async function filmSession(sessionId, name, issue) {
         }
       }
       // Turns are listed oldest-first; the newest one is last.
-      const turns = await fetch(`${TF}/api/v1/sessions/${sessionId}/turns?limit=100`).then(r => r.json());
+      const turns = await fetch(`${TF}/api/v1/sessions/${sessionId}/turns?limit=25`).then(r => r.json());
       const st = turns.data?.at(-1)?.state;
       const done = st?.status === 'done' && !(st.required_actions ?? []).length;
       if (done && approved.size >= 2) {

@@ -1,0 +1,12 @@
+{
+  "name": "show-dont-tell",
+  "private": true,
+  "type": "module",
+  "workspaces": ["browser-lab", "dispatcher"],
+  "scripts": {
+    "lab": "npm run start -w browser-lab",
+    "dispatcher": "npm run start -w dispatcher",
+    "typecheck": "npm run typecheck --workspaces"
+  },
+  "engines": { "node": ">=22.14" }
+}
